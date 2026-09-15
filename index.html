@@ -9,11 +9,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #1e3f20;       /* 딥그린 */
-      --primary-light: #2d5a2f; /* 포레스트그린 */
-      --accent: #e8f5e9;        /* 라이트그린 배경 */
-      --badge-pilot: #ff7043;   /* 파일럿 오렌지 */
-      --badge-cert: #2b6cb0;    /* 인증 블루 */
+      --primary: #1e3f20;
+      --primary-light: #2d5a2f;
+      --accent: #e8f5e9;
+      --badge-pilot: #ff7043;
+      --badge-cert: #2b6cb0;
       --bg-gray: #f8faf9;
       --border-color: #e2e8f0;
       --text-main: #191f28;
@@ -86,7 +86,6 @@
       padding: 24px 20px;
     }
 
-    /* Hero Banner */
     .hero-banner {
       background: linear-gradient(rgba(30, 63, 32, 0.85), rgba(30, 63, 32, 0.9)), url('https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=1200&q=80') center/cover;
       color: #fff;
@@ -107,7 +106,6 @@
     .hero-banner h1 { font-size: 1.85rem; margin-bottom: 8px; }
     .hero-banner p { font-size: 1.05rem; opacity: 0.9; }
 
-    /* Filters Section */
     .filter-card {
       background: #fff;
       border-radius: var(--radius-md);
@@ -146,7 +144,6 @@
       border-color: var(--primary);
     }
 
-    /* Product Grid */
     .product-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -222,7 +219,6 @@
     .btn-outline { border-color: var(--border-color); background: #fff; color: var(--text-main); }
     .btn-outline:hover { background: var(--bg-gray); }
 
-    /* Compare Floating Bar */
     .compare-bar {
       position: fixed;
       bottom: 24px;
@@ -241,11 +237,9 @@
     }
     .compare-bar.show { display: flex; }
 
-    /* Views */
     .view-panel { display: none; }
     .view-panel.active { display: block; }
 
-    /* Detail Page */
     .detail-header {
       background: #fff;
       border-radius: var(--radius-md);
@@ -336,7 +330,6 @@
     }
     .step-desc { font-size: 0.92rem; color: var(--text-sub); line-height: 1.6; }
 
-    /* Form Styles */
     .form-group { margin-bottom: 20px; }
     .form-label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.95rem; }
     .form-control {
@@ -353,7 +346,6 @@
     }
     .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
 
-    /* 10월, 11월 주말 일자 칩 선택기 */
     .weekend-selector {
       background: var(--bg-gray);
       border: 1px solid var(--border-color);
@@ -391,7 +383,6 @@
       font-weight: 600;
     }
 
-    /* Modals */
     .modal {
       display: none;
       position: fixed;
@@ -545,7 +536,7 @@
               <input type="text" id="camp-manager" class="form-control" required placeholder="홍길동 대표">
             </div>
             <div class="form-group">
-              <label class="form-label">연락처(핸드폰) * <span style="font-size:0.8rem; color:var(--text-muted);">(추후 신청 수정 시 확인용)</span></label>
+              <label class="form-label">연락처(핸드폰) * <span style="font-size:0.8rem; color:var(--text-muted);">(숫자만 또는 하이픈 포함 입력)</span></label>
               <input type="tel" id="camp-phone" class="form-control" required placeholder="010-0000-0000">
             </div>
           </div>
@@ -595,7 +586,7 @@
     <section id="view-success" class="view-panel">
       <div class="detail-header" style="text-align: center; padding: 48px 24px;">
         <div style="font-size: 3rem; margin-bottom: 12px;">🎉</div>
-        <h2 style="color: var(--primary);" id="successTitle">연계서비스 신청이 접수되었습니다</h2>
+        <h2 style="color: var(--primary);" id="successTitle">연계서비스 신청이 정상 접수되었습니다</h2>
         <p style="color: var(--text-sub); margin-top: 8px; font-size: 1.05rem;">
           제출해주신 내용은 운영본부로 실시간 전송되었으며, 전문업체와 일정 확인 후 빠르게 안내드리겠습니다.
         </p>
@@ -707,7 +698,7 @@
   </div>
 
   <script>
-    // ★ 구글 Apps Script 웹 앱 배포 URL을 입력하세요 ★
+    // ★ 구글 Apps Script 배포 URL ★
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTxd5uwjSH7_HJSflyMdYQSRW3CCpA-NaiHRWx7ITuxDGI3msr_Ir9r_TQWLcOW45aWA/exec";
 
     const fallbackImage = "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1000&q=80";
@@ -738,7 +729,7 @@
         days: "10~11월 토요일",
         timeSlots: "14:00~15:30 (토요일 집중 운영)",
         target: "유아 · 초등 가족",
-        rainy: "제한적 (우천 시 대체 공간)",
+        rainy: "제한적",
         difficulty: "보통",
         img: "https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?auto=format&fit=crop&w=1000&q=80",
         desc: "캠핑장 자체가 거대한 교실이 됩니다. 스마트폰 대신 자연물을 만지며 스스로 규칙을 만드는 언플러그드 놀이와 에코 크래프트 활동입니다.",
@@ -988,7 +979,6 @@
     let compareList = [];
     let isAdminLoggedIn = false;
 
-    // 주말 칩 생성
     function initWeekendSelectors() {
       const g10 = document.getElementById('weekend-grid-10');
       const g11 = document.getElementById('weekend-grid-11');
@@ -1022,7 +1012,6 @@
       }
     }
 
-    // 상품 카드 렌더링
     function renderProducts() {
       const grid = document.getElementById('productGrid');
       grid.innerHTML = '';
@@ -1194,38 +1183,38 @@
       document.getElementById('compareModal').classList.remove('show');
     }
 
-    // ID 기반 안전한 신청 화면 열기 (특수문자/따옴표 충돌 방지)
     function openApplyById(productId) {
       const item = products.find(p => p.id === productId);
       const title = item ? item.title : productId;
       openApply(title);
     }
 
-    // 신규 신청 화면 열기 (버그 수정: reset() 순서 조정)
     function openApply(prodTitle) {
       document.getElementById('edit-app-id').value = '';
       document.getElementById('applyFormTitle').textContent = '캠핑장 연계서비스 신청';
       document.getElementById('submitBtn').textContent = '연계서비스 신청 완료하기';
       
-      // 1. 폼 초기화 먼저 수행
       document.getElementById('applyForm').reset();
-      
-      // 2. 초기화 후에 선택한 프로그램명을 안전하게 주입
       document.getElementById('apply-program-name').value = prodTitle;
       
-      // 3. 주말 칩 초기화
       selectedWeekends = [];
       document.querySelectorAll('.weekend-chip').forEach(c => c.classList.remove('selected'));
       
       navigateTo('apply');
     }
 
-    // 신청 제출 (신규 접수 및 수정 공통 처리)
+    // 신청서 제출 (확실한 데이터 전송 로직 적용)
     async function handleApplySubmit(e) {
       e.preventDefault();
 
       if (selectedWeekends.length === 0) {
         alert('희망 운영 주말 일자를 1개 이상 선택해 주세요.');
+        return;
+      }
+
+      const siteVal = document.getElementById('camp-site-count').value;
+      if (!siteVal) {
+        alert('캠핑장 총 사이트 수를 입력해 주세요.');
         return;
       }
 
@@ -1238,28 +1227,30 @@
 
       const selectedEnv = Array.from(document.querySelectorAll('input[name="env"]:checked')).map(el => el.value);
 
+      // 스프레드시트 컬럼 매핑 객체 구성
       const appData = {
         action: isEdit ? "update" : "create",
         id: isEdit ? editId : "APP-" + Date.now().toString().slice(-6),
         date: new Date().toISOString().split('T')[0],
-        campName: document.getElementById('camp-name').value,
+        campName: document.getElementById('camp-name').value.trim(),
         region: document.getElementById('camp-region').value,
-        manager: document.getElementById('camp-manager').value,
+        manager: document.getElementById('camp-manager').value.trim(),
         phone: document.getElementById('camp-phone').value.replace(/[^0-9]/g, ''),
         program: document.getElementById('apply-program-name').value,
         planDates: selectedWeekends,
-        siteCount: document.getElementById('camp-site-count').value,
+        siteCount: Number(siteVal),
         env: selectedEnv,
-        memo: document.getElementById('camp-memo').value,
+        memo: document.getElementById('camp-memo').value.trim(),
         status: '신청접수'
       };
 
       try {
         if (GOOGLE_SCRIPT_URL && !GOOGLE_SCRIPT_URL.includes("여기에")) {
+          // text/plain 방식으로 전송하여 CORS 및 JSON 파싱 차단을 완벽히 방지
           await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
             mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify(appData)
           });
         }
@@ -1286,7 +1277,7 @@
     }
 
     // ==========================================
-    // 사장님: 본인 휴대폰 번호로 신청내역 확인 및 수정
+    // 사장님: 번호 조회 및 수정
     // ==========================================
 
     function openOwnerSearchModal() {
@@ -1393,7 +1384,7 @@
     }
 
     // ==========================================
-    // 운영 관리자 모달 및 기능
+    // 관리자 모달 및 기능
     // ==========================================
 
     function openAdminModal() {
