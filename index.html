@@ -436,7 +436,6 @@
       vertical-align: middle;
     }
 
-    /* 사장님 마이페이지 카드 */
     .owner-app-card {
       background: #fff;
       border: 1px solid var(--border-color);
@@ -523,7 +522,7 @@
 
           <div class="form-group">
             <label class="form-label">선택한 프로그램</label>
-            <input type="text" id="apply-program-name" class="form-control" readonly style="background:#f1f3f5; font-weight:bold;">
+            <input type="text" id="apply-program-name" class="form-control" readonly style="background:#f1f3f5; font-weight:bold; color:var(--primary);">
           </div>
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
@@ -551,7 +550,7 @@
             </div>
           </div>
 
-          <!-- 개편 1: 10월, 11월 주말 일자 다중 선택 -->
+          <!-- 10월, 11월 주말 일자 다중 선택 -->
           <div class="form-group">
             <label class="form-label">희망 운영일자 (10월 · 11월 주말 한정) * <span style="font-weight:normal; font-size:0.85rem; color:var(--primary);">(복수 선택 가능)</span></label>
             <div class="weekend-selector">
@@ -563,7 +562,7 @@
             </div>
           </div>
 
-          <!-- 개편 2: 캠핑장 총 사이트수 입력 -->
+          <!-- 캠핑장 총 사이트수 입력 -->
           <div class="form-group">
             <label class="form-label">캠핑장 총 사이트 수 (개) *</label>
             <input type="number" id="camp-site-count" class="form-control" required placeholder="예: 30" min="1">
@@ -713,7 +712,6 @@
 
     const fallbackImage = "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1000&q=80";
 
-    // 2026년 10월, 11월 주말 일자 정의
     const weekends10 = [
       "10.03(토)", "10.04(일)", "10.10(토)", "10.11(일)",
       "10.17(토)", "10.18(일)", "10.24(토)", "10.25(일)", "10.31(토)"
@@ -725,7 +723,6 @@
 
     let selectedWeekends = [];
 
-    // 상품 10종 데이터
     const products = [
       {
         id: "prod-little-exp",
@@ -1068,7 +1065,7 @@
 
             <div class="card-actions">
               <button class="btn btn-outline" onclick="showDetail('${item.id}')">상세보기</button>
-              <button class="btn btn-primary" onclick="openApply('${item.title}')">우리 캠핑장에 신청</button>
+              <button class="btn btn-primary" onclick="openApplyById('${item.id}')">우리 캠핑장에 신청</button>
             </div>
           </div>
         `;
@@ -1144,7 +1141,7 @@
         </div>
 
         <div style="text-align:center; margin-top:32px;">
-          <button class="btn btn-primary" style="padding:16px 60px; font-size:1.1rem;" onclick="openApply('${p.title}')">우리 캠핑장에 신청하기</button>
+          <button class="btn btn-primary" style="padding:16px 60px; font-size:1.1rem;" onclick="openApplyById('${p.id}')">우리 캠핑장에 신청하기</button>
         </div>
       `;
       navigateTo('detail');
@@ -1197,15 +1194,29 @@
       document.getElementById('compareModal').classList.remove('show');
     }
 
-    // 신규 신청 화면 열기
+    // ID 기반 안전한 신청 화면 열기 (특수문자/따옴표 충돌 방지)
+    function openApplyById(productId) {
+      const item = products.find(p => p.id === productId);
+      const title = item ? item.title : productId;
+      openApply(title);
+    }
+
+    // 신규 신청 화면 열기 (버그 수정: reset() 순서 조정)
     function openApply(prodTitle) {
       document.getElementById('edit-app-id').value = '';
       document.getElementById('applyFormTitle').textContent = '캠핑장 연계서비스 신청';
       document.getElementById('submitBtn').textContent = '연계서비스 신청 완료하기';
-      document.getElementById('apply-program-name').value = prodTitle;
+      
+      // 1. 폼 초기화 먼저 수행
       document.getElementById('applyForm').reset();
+      
+      // 2. 초기화 후에 선택한 프로그램명을 안전하게 주입
+      document.getElementById('apply-program-name').value = prodTitle;
+      
+      // 3. 주말 칩 초기화
       selectedWeekends = [];
       document.querySelectorAll('.weekend-chip').forEach(c => c.classList.remove('selected'));
+      
       navigateTo('apply');
     }
 
@@ -1305,7 +1316,6 @@
         const res = await fetch(GOOGLE_SCRIPT_URL);
         const apps = await res.json();
 
-        // 입력한 번호가 포함된 내역 필터링
         const myApps = apps.filter(a => a.phone && a.phone.toString().replace(/[^0-9]/g, '').includes(inputPhone));
 
         if (!myApps || myApps.length === 0) {
@@ -1352,7 +1362,6 @@
       }
     }
 
-    // 신청 내용 수정 모드로 폼 세팅
     function startEditApp(app) {
       document.getElementById('edit-app-id').value = app.id;
       document.getElementById('applyFormTitle').textContent = `신청 내용 수정 (${app.id})`;
@@ -1366,12 +1375,10 @@
       document.getElementById('camp-site-count').value = app.siteCount || '';
       document.getElementById('camp-memo').value = app.memo || '';
 
-      // 환경 체크박스
       document.querySelectorAll('input[name="env"]').forEach(chk => {
         chk.checked = app.env && app.env.includes(chk.value);
       });
 
-      // 주말 칩 세팅
       selectedWeekends = app.planDates ? [...app.planDates] : [];
       document.querySelectorAll('.weekend-chip').forEach(chip => {
         if (selectedWeekends.includes(chip.textContent)) {
@@ -1479,7 +1486,6 @@
       }
     }
 
-    // 네비게이션 제어
     function navigateTo(viewId) {
       document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
       document.getElementById(`view-${viewId}`).classList.add('active');
