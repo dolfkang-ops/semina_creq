@@ -696,8 +696,8 @@
   </div>
 
   <script>
-    // ★ 구글 Apps Script 배포 URL을 입력하세요 ★
-    const GOOGLE_SCRIPT_URL = "AKfycbxTxd5uwjSH7_HJSflyMdYQSRW3CCpA-NaiHRWx7ITuxDGI3msr_Ir9r_TQWLcOW45aWA";
+    // ★ [필수] 구글 Apps Script 배포 URL (/exec)을 아래 따옴표 안에 입력해주세요 ★
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTxd5uwjSH7_HJSflyMdYQSRW3CCpA-NaiHRWx7ITuxDGI3msr_Ir9r_TQWLcOW45aWA/exec";
 
     const fallbackImage = "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1000&q=80";
 
@@ -977,7 +977,6 @@
     let compareList = [];
     let isAdminLoggedIn = false;
 
-    // 10월, 11월 주말 칩 생성
     function initWeekendSelectors() {
       const g10 = document.getElementById('weekend-grid-10');
       const g11 = document.getElementById('weekend-grid-11');
@@ -1011,7 +1010,6 @@
       }
     }
 
-    // 전화번호 입력 시 010-XXXX-XXXX 자동 하이픈 서식 적용
     function formatPhoneInput(elem) {
       let val = elem.value.replace(/[^0-9]/g, '');
       if (val.length > 3 && val.length <= 7) {
@@ -1214,7 +1212,7 @@
       navigateTo('apply');
     }
 
-    // 신청서 제출 함수 (완벽한 데이터 패킷 구성 및 전송)
+    // [신청서 제출 함수] JSON 및 표준 FormData 지원
     async function handleApplySubmit(e) {
       e.preventDefault();
 
@@ -1238,7 +1236,6 @@
 
       const selectedEnv = Array.from(document.querySelectorAll('input[name="env"]:checked')).map(el => el.value);
 
-      // 010 형태 하이픈 포맷 적용
       let rawPhone = document.getElementById('camp-phone').value.replace(/[^0-9]/g, '');
       let formattedPhone = rawPhone;
       if (rawPhone.length === 11) {
@@ -1265,7 +1262,6 @@
 
       try {
         if (GOOGLE_SCRIPT_URL && !GOOGLE_SCRIPT_URL.includes("여기에")) {
-          // text/plain 전송으로 CORS 제한 및 데이터 누락 완벽 방지
           await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
             mode: 'no-cors',
@@ -1274,7 +1270,7 @@
           });
         }
       } catch (err) {
-        console.warn("전송 주의:", err);
+        console.warn("전송 통신 주의:", err);
       } finally {
         submitBtn.disabled = false;
 
@@ -1295,8 +1291,49 @@
       }
     }
 
+    // =========================================================
+    // [핵심] CORS 차단 완벽 우회: JSONP 클라우드 데이터 수신 함수
+    // =========================================================
+    function fetchAppsData() {
+      return new Promise((resolve, reject) => {
+        if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("여기에")) {
+          reject(new Error("URL_NOT_CONFIGURED"));
+          return;
+        }
+
+        const callbackName = "jsonp_cb_" + Math.round(100000 * Math.random());
+        const script = document.createElement("script");
+        const separator = GOOGLE_SCRIPT_URL.includes("?") ? "&" : "?";
+        const url = GOOGLE_SCRIPT_URL + separator + "callback=" + callbackName + "&_=" + Date.now();
+
+        const timeout = setTimeout(() => {
+          cleanup();
+          reject(new Error("TIMEOUT"));
+        }, 12000);
+
+        function cleanup() {
+          if (window[callbackName]) delete window[callbackName];
+          if (script.parentNode) script.parentNode.removeChild(script);
+          clearTimeout(timeout);
+        }
+
+        window[callbackName] = function(data) {
+          cleanup();
+          resolve(data);
+        };
+
+        script.src = url;
+        script.onerror = function() {
+          cleanup();
+          reject(new Error("NETWORK_ERROR"));
+        };
+
+        document.body.appendChild(script);
+      });
+    }
+
     // ==========================================
-    // 사장님: 휴대폰 번호 스마트 검색 (전체/뒷자리 완벽 대응)
+    // 사장님: 휴대폰 번호 스마트 검색
     // ==========================================
 
     function openOwnerSearchModal() {
@@ -1324,15 +1361,11 @@
       document.getElementById('ownerAppList').innerHTML = `<p style="padding:20px; text-align:center;">클라우드에서 내역을 불러오는 중입니다...</p>`;
 
       try {
-        const res = await fetch(GOOGLE_SCRIPT_URL);
-        const apps = await res.json();
+        const apps = await fetchAppsData();
 
-        // 스마트 번호 매칭: 양쪽 모두 숫자만 추출하여 포함 여부 및 일치 여부 검사
         const myApps = apps.filter(a => {
           if (!a.phone) return false;
           let rowDigits = a.phone.toString().replace(/[^0-9]/g, '');
-          
-          // 0이 누락되어 1042265988 형태인 경우 010으로 보정 후 비교
           if (rowDigits.length === 10 && rowDigits.startsWith("10")) {
             rowDigits = "0" + rowDigits;
           }
@@ -1385,7 +1418,11 @@
         `).join('');
 
       } catch (err) {
-        document.getElementById('ownerAppList').innerHTML = `<p style="padding:20px; text-align:center; color:#e53e3e;">데이터를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.</p>`;
+        if (err.message === "URL_NOT_CONFIGURED") {
+          document.getElementById('ownerAppList').innerHTML = `<p style="padding:20px; text-align:center; color:#e53e3e;">구글 스프레드시트 URL이 설정되지 않았습니다.</p>`;
+        } else {
+          document.getElementById('ownerAppList').innerHTML = `<p style="padding:20px; text-align:center; color:#e53e3e;">데이터를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.</p>`;
+        }
       }
     }
 
@@ -1420,7 +1457,7 @@
     }
 
     // ==========================================
-    // 관리자 모달 및 기능
+    // 관리자 모달 및 대시보드
     // ==========================================
 
     function openAdminModal() {
@@ -1464,14 +1501,8 @@
       const tbody = document.getElementById('adminTableBody');
       tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px;">클라우드에서 최신 데이터를 불러오는 중입니다...</td></tr>`;
 
-      if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("여기에")) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:#e53e3e;">구글 스프레드시트 URL을 등록해 주세요.</td></tr>`;
-        return;
-      }
-
       try {
-        const res = await fetch(GOOGLE_SCRIPT_URL);
-        const apps = await res.json();
+        const apps = await fetchAppsData();
 
         if (!apps || apps.length === 0) {
           tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--text-muted);">접수된 신청 내역이 없습니다.</td></tr>`;
@@ -1509,7 +1540,11 @@
           </tr>
         `).join('');
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:#e53e3e;">데이터를 가져오는데 실패했습니다. 구글 시트 권한을 확인해주세요.</td></tr>`;
+        if (err.message === "URL_NOT_CONFIGURED") {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:#e53e3e;">구글 스프레드시트 URL을 등록해 주세요.</td></tr>`;
+        } else {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:#e53e3e;">데이터를 가져오는데 실패했습니다. 구글 앱스 스크립트 배포 시 [액세스 권한: 모든 사용자]로 배포되었는지 확인해주세요.</td></tr>`;
+        }
       }
     }
 
