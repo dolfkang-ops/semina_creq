@@ -697,7 +697,7 @@
 
   <script>
     // ★ 구글 Apps Script 배포 URL을 입력하세요 ★
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTxd5uwjSH7_HJSflyMdYQSRW3CCpA-NaiHRWx7ITuxDGI3msr_Ir9r_TQWLcOW45aWA/exec";
+    const GOOGLE_SCRIPT_URL = "AKfycbxTxd5uwjSH7_HJSflyMdYQSRW3CCpA-NaiHRWx7ITuxDGI3msr_Ir9r_TQWLcOW45aWA";
 
     const fallbackImage = "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1000&q=80";
 
@@ -1264,7 +1264,7 @@
       };
 
       try {
-        if (GOOGLE_SCRIPT_URL && !GOOGLE_SCRIPT_URL.includes("https://script.google.com/macros/s/AKfycbxTxd5uwjSH7_HJSflyMdYQSRW3CCpA-NaiHRWx7ITuxDGI3msr_Ir9r_TQWLcOW45aWA/exec")) {
+        if (GOOGLE_SCRIPT_URL && !GOOGLE_SCRIPT_URL.includes("여기에")) {
           // text/plain 전송으로 CORS 제한 및 데이터 누락 완벽 방지
           await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
@@ -1464,7 +1464,7 @@
       const tbody = document.getElementById('adminTableBody');
       tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px;">클라우드에서 최신 데이터를 불러오는 중입니다...</td></tr>`;
 
-      if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("https://script.google.com/macros/s/AKfycbxTxd5uwjSH7_HJSflyMdYQSRW3CCpA-NaiHRWx7ITuxDGI3msr_Ir9r_TQWLcOW45aWA/exec")) {
+      if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("여기에")) {
         tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:#e53e3e;">구글 스프레드시트 URL을 등록해 주세요.</td></tr>`;
         return;
       }
