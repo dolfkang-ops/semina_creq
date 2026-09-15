@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>산림복지 체험상품 × 캠핑장 매칭 서비스</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1e3f20;       /* 딥그린 */
+      --primary-light: #2d5a2f; /* 포레스트그린 */
+      --accent: #e8f5e9;        /* 라이트그린 배경 */
+      --badge-pilot: #ff7043;   /* 파일럿 오렌지 */
+      --badge-cert: #2b6cb0;    /* 인증 블루 */
+      --bg-gray: #f8faf9;
+      --border-color: #e2e8f0;
+      --text-main: #191f28;
+      --text-sub: #4e5968;
+      --text-muted: #8b95a1;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', sans-serif; }
+    body { background-color: var(--bg-gray); color: var(--text-main); line-height: 1.5; padding-bottom: 60px; }
+
+    header {
+      background: #fff;
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-links { display: flex; gap: 12px; align-items: center; }
+    .btn-nav {
+      background: none;
+      border: none;
+      padding: 8px 14px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-sub);
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      transition: all 0.2s;
+    }
+    .btn-nav.active {
+      color: var(--primary);
+      background-color: var(--accent);
+    }
+    .btn-admin-login {
+      border: 1px solid var(--border-color);
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      border-radius: var(--radius-sm);
+      color: var(--text-sub);
+      cursor: pointer;
+      background: #fff;
+    }
+
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 24px 20px;
+    }
+
+    /* Hero Banner */
+    .hero-banner {
+      background: linear-gradient(rgba(30, 63, 32, 0.85), rgba(30, 63, 32, 0.9)), url('https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=1200&q=80') center/cover;
+      color: #fff;
+      border-radius: var(--radius-lg);
+      padding: 40px 32px;
+      margin-bottom: 32px;
+    }
+    .hero-banner .badge {
+      background-color: var(--badge-pilot);
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-bottom: 12px;
+    }
+    .hero-banner h1 { font-size: 1.85rem; margin-bottom: 8px; }
+    .hero-banner p { font-size: 1.05rem; opacity: 0.9; }
+
+    /* Filters Section */
+    .filter-card {
+      background: #fff;
+      border-radius: var(--radius-md);
+      padding: 20px;
+      margin-bottom: 28px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .filter-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .filter-label {
+      font-weight: 600;
+      min-width: 80px;
+      font-size: 0.9rem;
+      color: var(--text-sub);
+    }
+    .chip-group { display: flex; gap: 8px; flex-wrap: wrap; }
+    .chip {
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      background: #fff;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .chip.active {
+      background-color: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    /* Product Grid */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+    .product-card {
+      background: #fff;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s;
+      position: relative;
+    }
+    .product-card:hover { transform: translateY(-4px); }
+    .card-img {
+      height: 200px;
+      width: 100%;
+      object-fit: cover;
+      background-color: #2d5a2f;
+    }
+    .card-badges {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .badge-tag {
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(4px);
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .card-body { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; }
+    .card-category { font-size: 0.8rem; color: var(--primary-light); font-weight: 700; margin-bottom: 4px; }
+    .card-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 12px; }
+    .card-specs {
+      background: var(--bg-gray);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      margin-bottom: 16px;
+      font-size: 0.88rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .spec-item span:first-child { color: var(--text-muted); margin-right: 6px; }
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: auto;
+    }
+    .btn {
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-align: center;
+      border: 1px solid transparent;
+      flex: 1;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-light); }
+    .btn-outline { border-color: var(--border-color); background: #fff; color: var(--text-main); }
+    .btn-outline:hover { background: var(--bg-gray); }
+
+    /* Compare Floating Bar */
+    .compare-bar {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(30, 63, 32, 0.95);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 40px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+      z-index: 99;
+      display: none;
+    }
+    .compare-bar.show { display: flex; }
+
+    /* Views */
+    .view-panel { display: none; }
+    .view-panel.active { display: block; }
+
+    /* Detail Page */
+    .detail-header {
+      background: #fff;
+      border-radius: var(--radius-md);
+      padding: 24px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 24px;
+    }
+    .detail-hero-img-wrap {
+      width: 100%;
+      max-height: 400px;
+      overflow: hidden;
+      border-radius: var(--radius-md);
+      margin-bottom: 20px;
+      background-color: #2d5a2f;
+    }
+    .detail-hero-img {
+      width: 100%;
+      height: 380px;
+      object-fit: cover;
+    }
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin: 20px 0;
+    }
+    .metric-card {
+      background: var(--bg-gray);
+      padding: 16px;
+      border-radius: var(--radius-sm);
+      text-align: center;
+    }
+    .metric-title { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; }
+    .metric-value { font-size: 1.1rem; font-weight: 700; color: var(--primary); }
+
+    .detail-section {
+      background: #fff;
+      border-radius: var(--radius-md);
+      padding: 24px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 20px;
+    }
+    .detail-section h3 { margin-bottom: 14px; font-size: 1.15rem; }
+
+    .curriculum-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+    }
+    .curriculum-step {
+      display: flex;
+      gap: 16px;
+      background: var(--bg-gray);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+    }
+    .step-badge-num {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.85rem;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+    }
+    .step-body { flex: 1; }
+    .step-header-line {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+    .step-title { font-size: 1rem; font-weight: 700; color: var(--text-main); }
+    .step-subtitle {
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: var(--accent);
+      color: var(--primary-light);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    .step-desc { font-size: 0.92rem; color: var(--text-sub); line-height: 1.6; }
+
+    .effect-box {
+      background: #f1f8f3;
+      border-left: 4px solid var(--primary-light);
+      padding: 14px 18px;
+      border-radius: var(--radius-sm);
+      margin-top: 16px;
+      font-size: 0.92rem;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* Form Styles */
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.95rem; }
+    .form-control {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-size: 0.95rem;
+    }
+    .checkbox-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
+
+    /* Modals */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal.show { display: flex; }
+    .modal-content {
+      background: #fff;
+      max-width: 960px;
+      width: 100%;
+      border-radius: var(--radius-md);
+      padding: 28px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    table.compare-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    table.compare-table th, table.compare-table td {
+      padding: 12px 14px;
+      border: 1px solid var(--border-color);
+      text-align: center;
+      font-size: 0.88rem;
+    }
+    table.compare-table th { background: var(--bg-gray); }
+
+    .admin-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .admin-table th {
+      background: var(--bg-gray);
+      padding: 12px 10px;
+      border-bottom: 2px solid var(--border-color);
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-sub);
+    }
+    .admin-table td {
+      padding: 14px 10px;
+      border-bottom: 1px solid var(--border-color);
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="nav-container">
+      <div class="logo" onclick="navigateTo('list')">
+        🌲 <span>산림복지 × 캠핑장 매칭</span>
+      </div>
+      <div class="nav-links">
+        <button class="btn-nav active" id="nav-list" onclick="navigateTo('list')">체험 프로그램 탐색</button>
+        <button class="btn-admin-login" id="nav-admin-btn" onclick="openAdminModal()">🔒 운영 관리자</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- 1. 메인 목록 페이지 -->
+    <main id="view-list" class="view-panel active">
+      <div class="hero-banner">
+        <span class="badge">가평 · 양평 파일럿 사업</span>
+        <h1>캠핑장에 새로운 자연 경험을 더하세요</h1>
+        <p>검증된 산림복지전문업의 숲체험 프로그램을 선택하고, 간편하게 캠핑장 연계 서비스를 신청하세요.</p>
+      </div>
+
+      <section class="filter-card">
+        <div class="filter-row">
+          <div class="filter-label">지역 필터</div>
+          <div class="chip-group" id="filter-region">
+            <button class="chip active" onclick="setFilter('region', 'all', this)">전체</button>
+            <button class="chip" onclick="setFilter('region', '가평', this)">가평</button>
+            <button class="chip" onclick="setFilter('region', '양평', this)">양평</button>
+          </div>
+        </div>
+        <div class="filter-row">
+          <div class="filter-label">분야 필터</div>
+          <div class="chip-group" id="filter-category">
+            <button class="chip active" onclick="setFilter('category', 'all', this)">전체</button>
+            <button class="chip" onclick="setFilter('category', '숲해설', this)">숲해설</button>
+            <button class="chip" onclick="setFilter('category', '산림치유', this)">산림치유</button>
+            <button class="chip" onclick="setFilter('category', '가족 숲놀이', this)">가족 숲놀이</button>
+            <button class="chip" onclick="setFilter('category', '자연공예', this)">자연공예</button>
+          </div>
+        </div>
+        <div class="filter-row">
+          <div class="filter-label">운영 형태</div>
+          <div class="chip-group" id="filter-type">
+            <button class="chip active" onclick="setFilter('type', 'all', this)">전체</button>
+            <button class="chip" onclick="setFilter('type', '셀프키트', this)">셀프 체험 키트</button>
+            <button class="chip" onclick="setFilter('type', '지도사 방문', this)">지도사 캠핑장 방문형</button>
+          </div>
+        </div>
+      </section>
+
+      <div class="product-grid" id="productGrid"></div>
+    </main>
+
+    <!-- 2. 상품 상세 페이지 -->
+    <section id="view-detail" class="view-panel">
+      <button class="btn btn-outline" onclick="navigateTo('list')" style="margin-bottom: 16px;">← 목록으로 돌아가기</button>
+      <div id="detailContent"></div>
+    </section>
+
+    <!-- 3. 캠핑장 연계 신청 페이지 -->
+    <section id="view-apply" class="view-panel">
+      <div class="detail-header">
+        <h2>캠핑장 연계서비스 신청</h2>
+        <p style="color:var(--text-sub); margin-top:4px;">신청서를 작성해주시면 땡큐캠핑 운영자가 전문업체와 검토 후 1 영업일 내 연락드립니다.</p>
+      </div>
+
+      <div class="detail-section">
+        <form id="applyForm" onsubmit="handleApplySubmit(event)">
+          <div class="form-group">
+            <label class="form-label">선택한 프로그램</label>
+            <input type="text" id="apply-program-name" class="form-control" readonly style="background:#f1f3f5; font-weight:bold;">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="form-group">
+              <label class="form-label">캠핑장명 *</label>
+              <input type="text" id="camp-name" class="form-control" required placeholder="예: 유명산 힐링캠핑장">
+            </div>
+            <div class="form-group">
+              <label class="form-label">지역 구분 *</label>
+              <select id="camp-region" class="form-control" required>
+                <option value="가평">가평군</option>
+                <option value="양평">양평군</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="form-group">
+              <label class="form-label">담당자명 *</label>
+              <input type="text" id="camp-manager" class="form-control" required placeholder="홍길동 대표">
+            </div>
+            <div class="form-group">
+              <label class="form-label">연락처 *</label>
+              <input type="tel" id="camp-phone" class="form-control" required placeholder="010-0000-0000">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="form-group">
+              <label class="form-label">희망 운영일자 *</label>
+              <input type="date" id="camp-date" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">예상 참여인원 *</label>
+              <input type="number" id="camp-capacity" class="form-control" required placeholder="권장 인원 참고">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">캠핑장 운영환경 확인 (중복 선택 가능)</label>
+            <div class="checkbox-grid">
+              <label class="checkbox-item"><input type="checkbox" name="env" value="실내 공간"> 실내 테이블 공간 보유</label>
+              <label class="checkbox-item"><input type="checkbox" name="env" value="야외 테이블"> 야외 테이블 공간 보유</label>
+              <label class="checkbox-item"><input type="checkbox" name="env" value="숲길 접근"> 주변 숲길/산책로 접근 가능</label>
+              <label class="checkbox-item"><input type="checkbox" name="env" value="야간 조명"> 야간 안전 이동로 확보</label>
+              <label class="checkbox-item"><input type="checkbox" name="env" value="주차장"> 강사/배송 차량 주차 가능</label>
+              <label class="checkbox-item"><input type="checkbox" name="env" value="우천 대비"> 우천 대체 공간 보유</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">추가 요청사항</label>
+            <textarea id="camp-memo" class="form-control" rows="3" placeholder="일정 조율, 희망 시간대(오전/오후/야간) 등 자유롭게 적어주세요."></textarea>
+          </div>
+
+          <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 1.05rem;">연계서비스 신청 완료하기</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 4. 캠핑장 전용: 신청 완료 안내 뷰 -->
+    <section id="view-success" class="view-panel">
+      <div class="detail-header" style="text-align: center; padding: 48px 24px;">
+        <div style="font-size: 3rem; margin-bottom: 12px;">🎉</div>
+        <h2 style="color: var(--primary);">연계서비스 신청이 정상 접수되었습니다</h2>
+        <p style="color: var(--text-sub); margin-top: 8px; font-size: 1.05rem;">
+          제출해주신 내용은 운영본부로 실시간 전송되었으며, 전문업체와 일정 확인 후 빠르게 안내드리겠습니다.
+        </p>
+
+        <div id="successReceipt" style="max-width: 500px; margin: 28px auto; text-align: left; background: var(--bg-gray); padding: 20px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);"></div>
+
+        <div style="margin-top: 32px;">
+          <button class="btn btn-primary" style="max-width: 240px;" onclick="navigateTo('list')">다른 프로그램 더 둘러보기</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. 운영 관리자 전용: 신청 관리 대시보드 -->
+    <section id="view-admin" class="view-panel">
+      <div class="detail-header" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
+        <div>
+          <h2>운영 관리자 대시보드</h2>
+          <p style="color: var(--text-sub); margin-top: 4px;">클라우드 스프레드시트에 영구 저장된 전체 캠핑장 신청 내역을 조회합니다.</p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-outline" onclick="fetchAdminApplications()" style="font-size:0.85rem; padding: 8px 14px;">🔄 새로고침</button>
+          <button class="btn btn-outline" onclick="adminLogout()" style="font-size:0.85rem; padding: 8px 14px; color:#e53e3e;">로그아웃</button>
+        </div>
+      </div>
+
+      <div class="detail-section" style="overflow-x: auto;">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>접수번호/일시</th>
+              <th>캠핑장명 (지역)</th>
+              <th>담당자 / 연락처</th>
+              <th>신청 프로그램</th>
+              <th>희망일 / 인원</th>
+              <th>보유환경 / 메모</th>
+              <th>진행 상태</th>
+            </tr>
+          </thead>
+          <tbody id="adminTableBody">
+            <tr><td colspan="7" style="text-align:center; padding:30px;">데이터를 불러오는 중입니다...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- 관리자 로그인 모달 -->
+  <div class="modal" id="adminLoginModal">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+      <h3 style="margin-bottom: 8px;">운영 관리자 인증</h3>
+      <p style="font-size: 0.88rem; color: var(--text-sub); margin-bottom: 20px;">관리자 전용 비밀번호를 입력해주세요.</p>
+      <form onsubmit="handleAdminLogin(event)">
+        <input type="password" id="adminPasswordInput" class="form-control" placeholder="비밀번호 입력" required style="margin-bottom: 16px; text-align: center;">
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn btn-outline" onclick="closeAdminModal()">취소</button>
+          <button type="submit" class="btn btn-primary">로그인</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 하단 비교 플로팅 바 -->
+  <div class="compare-bar" id="compareBar">
+    <span>선택된 프로그램 <strong id="compareCount">0</strong> / 3</span>
+    <button class="btn btn-outline" style="background:#fff; color:var(--primary); padding:6px 14px;" onclick="openCompareModal()">선택상품 비교하기</button>
+  </div>
+
+  <!-- 상품 비교 모달 -->
+  <div class="modal" id="compareModal">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3>체험 프로그램 스펙 비교</h3>
+        <button onclick="closeCompareModal()" style="border:none; background:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="compare-table" id="modalCompareTable"></table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // ★ [중요] 아래 URL에 배포하신 구글 웹 앱 URL을 붙여넣어 주세요! ★
+    // =========================================================================
+    const GOOGLE_SCRIPT_URL = "여기에_배포된_URL을_붙여넣으세요";
+
+    const fallbackImage = "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1000&q=80";
+
+    const products = [
+      {
+        id: "prod-little-exp",
+        title: "숲속 꼬마 탐험대",
+        subTitle: "오감으로 빚는 자연 학교 (언플러그드 숲놀이 & 에코 크래프트)",
+        category: "숲해설",
+        type: "지도사 방문",
+        region: ["가평", "양평"],
+        price: 25000,
+        minCost: 125000,
+        duration: "90분",
+        capacity: "5~15명",
+        days: "토요일",
+        timeSlots: "14:00~15:30 (토요일 집중 운영)",
+        target: "유아 · 초등 가족",
+        rainy: "제한적 (우천 시 대체 공간)",
+        difficulty: "보통",
+        img: "https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?auto=format&fit=crop&w=1000&q=80",
+        imgCaption: "숲속 자연물을 관찰하고 교감하며 오감을 깨우는 숲속 꼬마 탐험대",
+        desc: "캠핑장 자체가 거대한 교실이 됩니다. 스마트폰과 게임기 대신 나뭇가지, 돌멩이, 흙을 만지며 스스로 놀이 규칙을 만드는 '언플러그드(Unplugged)' 놀이 학교입니다. 생태 전문가와 함께 자연의 미세한 숨소리를 관찰하고, 숲에서 얻은 부산물로 나만의 예술 작품을 빚어내는 친환경 '에코 크래프트'를 결합했습니다.",
+        effectText: "언플러그드 힐링 → 자연 친화 에코 크래프트 → 두뇌 발달 및 상상력 자극",
+        curriculum: [
+          { step: 1, title: "1. [감각 깨우기] 숲의 숨소리에 귀 기울이기 (20분)", subtitle: "오감 열기", desc: "숲의 다양한 소리를 수집하고, 눈을 감고 바람의 냄새를 맡으며 굳어있던 감각을 깨웁니다." },
+          { step: 2, title: "2. [탐험하기] 자연 속 보물찾기 (35분)", subtitle: "관찰력 집중", desc: "\"세상에서 가장 예쁜 색깔의 나뭇잎 찾기\", \"하트 모양 돌멩이 찾기\" 등 미션을 수행합니다." },
+          { step: 3, title: "3. [창조하기] 자연물로 만드는 나만의 예술 (35분)", subtitle: "에코 크래프트", desc: "나뭇가지로 가족 얼굴 만들기, 나무구슬 팔찌, 부채, 솔방울 인형 등 에코 크래프트 창작 활동" }
+        ],
+        checkpoints: ["텐트 문을 열면 바로 시작되는 캠핑장 밀착형 수업", "천연 에코 크래프트 결과물 증정", "토요일 골든타임(14:00~15:30) 운영"]
+      },
+      {
+        id: "prod-teacher-exp",
+        title: "숲선생님과 함께하는 숲탐험대",
+        subTitle: "유·초등 아이들이 전문 숲선생님과 함께 숲을 직접 탐색하는 참여형 숲체험",
+        category: "숲해설",
+        type: "지도사 방문",
+        region: ["가평", "양평"],
+        price: 25000,
+        minCost: 0,
+        duration: "90분",
+        capacity: "4~6명 (소수 정예)",
+        days: "금 · 토 · 일",
+        timeSlots: "16:00~17:30",
+        target: "유아 · 초등 소그룹",
+        rainy: "제한적 (우천 시 사전 조율)",
+        difficulty: "낮음",
+        img: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=1000&q=80",
+        imgCaption: "전문 숲선생님과 루페를 들고 작은 숲 생태계를 밀착 탐험하는 아이들",
+        desc: "「숲선생님과 떠나는 숲탐험대」는 유·초등 아이들이 전문 숲선생님과 함께 숲을 직접 탐색하고 자연을 오감으로 경험하는 참여형 숲체험 프로그램입니다.",
+        effectText: "소수 정예 밀착 케어 → 생태 감수성 증진 → 팀워크 및 협동심 함양",
+        curriculum: [
+          { step: 1, title: "1. 숲선생님과의 첫 만남 & 안전 수칙 (15분)", subtitle: "캠핑장 집결", desc: "안전한 탐험을 위한 규칙 숙지 및 몸 깨우기 체조" },
+          { step: 2, title: "2. 계절 숲 오감 생태 탐색 (35분)", subtitle: "숲길 탐험", desc: "나뭇잎 맥, 곤충, 나무껍질 오감 관찰 및 돋보기 탐구 미션" },
+          { step: 3, title: "3. 협동 숲놀이 & 자연물 창작 (30분)", subtitle: "숲속 놀이터", desc: "협동 미션 수행 및 주워 모은 자연물로 기념작품 만들기" },
+          { step: 4, title: "4. 탐험 완료 & 소감 나누기 (10분)", subtitle: "마무리", desc: "탐험 소감 발표, 탐험대 배지 수여 및 복귀" }
+        ],
+        checkpoints: ["최소 운영비용 0원으로 부담 없는 도입", "4~6명 소수 정예 집중 케어", "금·토·일 오후 4시 운영"]
+      },
+      {
+        id: "prod-nansea",
+        title: "난새, 숲새, 놀새~!",
+        subTitle: "자연에서 자연물을 소재로 놀고 자연을 배우는 국가인증 프로그램",
+        category: "숲해설",
+        type: "지도사 방문",
+        region: ["가평"],
+        price: 15000,
+        minCost: 150000,
+        duration: "60분",
+        capacity: "8~15명",
+        days: "월 · 화 · 수 · 목 · 금 · 토 · 일 (상시)",
+        timeSlots: "10:30~11:30",
+        target: "유아 · 초등 · 가족",
+        rainy: "제한적",
+        difficulty: "낮음",
+        img: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=1000&q=80",
+        imgCaption: "자연물을 만지고 숲에서 뛰노는 국가 인증 숲놀이 프로그램",
+        isCertified: true,
+        desc: "공인된 프로그램 인증을 획득하여 안전성과 교육적 완성도가 검증된 숲놀이 프로그램입니다.",
+        effectText: "자연 감수성 향상 → 창의적 자연물 놀이 → 오감 발달 및 생태계 이해",
+        curriculum: [
+          { step: 1, title: "1. 숲과 반갑게 인사하기 (10분)", subtitle: "캠핑장 집결", desc: "몸풀기 체조 및 안전 수칙 안내" },
+          { step: 2, title: "2. 자연물 보물 수집 & 탐색 (20분)", subtitle: "숲길 산책", desc: "나뭇가지, 솔방울 등 다양한 자연물 재료 수집" },
+          { step: 3, title: "3. '난새, 숲새, 놀새' 신나는 숲놀이 (20분)", subtitle: "자연놀이 마당", desc: "전래 숲놀이 및 자연물 조형물 만들기" },
+          { step: 4, title: "4. 자연물 돌려주기 & 나눔 (10분)", subtitle: "마무리", desc: "자연물 반환 및 소감 나누기" }
+        ],
+        checkpoints: ["국가 프로그램 인증 획득", "잔디마당 및 완만한 산책로 활용", "가평군 전역 파견"]
+      },
+      {
+        id: "prod-night-exp",
+        title: "[밤숲체험] 별빛 숲속 야간 탐험대",
+        subTitle: "인공 불빛을 끄고 밤에 깨어나는 야행성 곤충과 식물을 만나는 밤숲 탐험",
+        category: "숲해설",
+        type: "지도사 방문",
+        region: ["가평", "양평"],
+        price: 15000,
+        minCost: 13000,
+        duration: "70분",
+        capacity: "8~14명",
+        days: "금 · 토 · 일",
+        timeSlots: "하절기 19:30~20:40 / 동·간절기 19:00~20:10",
+        target: "어린이 동반 가족 · 캠퍼",
+        rainy: "제한적",
+        difficulty: "보통",
+        img: "https://images.unsplash.com/photo-1517824806704-9040b037703b?auto=format&fit=crop&w=1000&q=80",
+        imgCaption: "레드라이트와 자외선 라이트를 들고 떠나는 밤숲 탐험",
+        desc: "전문 숲해설 지도사와 함께 인공 불빛을 끄고 밤에 깨어나는 곤충과 밤하늘의 소리에 집중해 보는 야간 탐방입니다.",
+        effectText: "야간 생태계 탐구 → 오감 자극 → 암순응 및 자연 호기심 자극",
+        curriculum: [
+          { step: 1, title: "1. 집결 및 안전 오리엔테이션 (10분)", subtitle: "캠핑장 잔디마당", desc: "안전 수칙 안내 및 레드라이트 배부" },
+          { step: 2, title: "2. 오감 열기: 밤의 소리와 냄새 (15분)", subtitle: "밤숲 도입부", desc: "불빛 끄고 밤숲 소리와 피톤치드 느끼기" },
+          { step: 3, title: "3. 야행성 생태 탐색: 플래시 관찰 (30분)", subtitle: "숲길 탐험로", desc: "자외선(UV) 라이트로 야행성 곤충 및 애벌레 흔적 찾기" },
+          { step: 4, title: "4. 별빛 쉼터 & 마무리 (15분)", subtitle: "야외 쉼터", desc: "돗자리에 누워 별자리 관찰 및 수료증 전달" }
+        ],
+        checkpoints: ["야간 안전 이동로 확보 필요", "레드라이트 등 전문 장비 전량 제공", "패밀리 캠핑 킬러 콘텐츠"]
+      },
+      {
+        id: "prod-shim-forest",
+        title: "[숲해설] 쉼 숲: 느리게 걷고 깊게 쉬는 숲 산책",
+        subTitle: "평탄한 둘레길을 천천히 걸으며 즐기는 오감 휴식과 숲멍",
+        category: "숲해설",
+        type: "지도사 방문",
+        region: ["가평", "양평"],
+        price: 10000,
+        minCost: 80000,
+        duration: "50분",
+        capacity: "8~14명",
+        days: "금 · 토 · 일",
+        timeSlots: "15:30~16:20",
+        target: "온 가족 · 시니어 · 힐링 캠퍼",
+        rainy: "제한적",
+        difficulty: "매우 낮음",
+        img: "https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=1000&q=80",
+        imgCaption: "평탄한 숲길을 천천히 걸으며 자연을 루페로 관찰하는 느린 산책",
+        desc: "완만한 둘레길을 천천히 걸으며 들꽃을 관찰하고 그늘 아래서 아무것도 하지 않는 숲멍을 즐깁니다.",
+        effectText: "스트레스 경감 → 신체적 이완 → 자연 관찰력 회복",
+        curriculum: [
+          { step: 1, title: "1. 숲과의 첫인사 & 몸풀기 (5분)", subtitle: "잔디마당", desc: "가벼운 스트레칭 및 루페 배부" },
+          { step: 2, title: "2. 느린 걸음 생태 산책 (25분)", subtitle: "둘레길", desc: "루페로 들꽃, 이끼, 나뭇잎맥 관찰" },
+          { step: 3, title: "3. 숲 그늘 쉼터 & 오감 휴식 (15분)", subtitle: "그늘 돗자리", desc: "숲멍과 시원한 바람 즐기기" },
+          { step: 4, title: "4. 마무리 & 피드백 (5분)", subtitle: "마무리", desc: "소감 나누기 및 복귀" }
+        ],
+        checkpoints: ["1인 10,000원 부담 없는 비용", "평지형 캠핑장 최적", "전 연령 수용 가능"]
+      },
+      {
+        id: "prod-wedding",
+        title: "(Remind) Wedding In the Forest",
+        subTitle: "결혼식 형태로 진행하는 로맨틱 생태탐방 숲해설",
+        category: "숲해설",
+        type: "지도사 방문",
+        region: ["가평", "양평"],
+        price: 30000,
+        minCost: 300000,
+        duration: "90분",
+        capacity: "10명 이상",
+        days: "월 · 화 · 수 · 목 · 금 · 토 · 일 (상시)",
+        timeSlots: "10:00~16:00",
+        target: "부부 · 커플 · 리마인드 가족",
+        rainy: "제한적",
+        difficulty: "낮음",
+        img: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1000&q=80",
+        imgCaption: "숲속 자연물을 활용한 부케와 화관으로 진행하는 리마인드 웨딩 숲해설",
+        desc: "자연물로 화관과 부케를 만들고 숲의 공생 이야기를 주례사로 듣는 감동 스토리텔링 프로그램입니다.",
+        effectText: "부부 유대감 회복 → 자연 공생의 지혜 습득 → 감성 추억 형성",
+        curriculum: [
+          { step: 1, title: "1. 결혼반지 교환 (30분)", subtitle: "예물 준비", desc: "야생화로 화관, 부케, 꽃반지 제작" },
+          { step: 2, title: "2. 웨딩마치 및 주례사 (40분)", subtitle: "생태 스토리", desc: "지의류 등 숲의 공생 생태 해설" },
+          { step: 3, title: "3. 웨딩사진 촬영 및 마무리 (20분)", subtitle: "스냅 포토", desc: "자연 속 버진로드에서 기념촬영" }
+        ],
+        checkpoints: ["부부/중장년 특화 프리미엄 콘텐츠", "사진 촬영 산책로 필요", "해설사 키트 총괄"]
+      },
+      {
+        id: "prod-ogm",
+        title: "오감숲속 힐링",
+        subTitle: "캠핑힐링; 오감숲속체험 & 힐링 (숲과 만나고, 느끼고, 일상으로)",
+        category: "산림치유",
+        type: "지도사 방문",
+        region: ["가평"],
+        price: 15000,
+        minCost: 300000,
+        duration: "90분",
+        capacity: "8~20명",
+        days: "월 · 화 · 수 · 목 · 금 · 토 · 일 (상시)",
+        timeSlots: "10:30~12:00 / 13:30~15:00",
+        target: "성인 · 가족 · 힐링 캠퍼",
+        rainy: "제한적",
+        difficulty: "낮음",
+        img: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1000&q=80",
+        imgCaption: "숲길을 걸으며 깊은 호흡과 오감으로 자연과 교감하는 산림치유",
+        desc: "숲해설 중심 지식 전달보다 쉼, 느낌, 교감, 회복에 중점을 둔 고품격 산림치유 프로그램입니다.",
+        effectText: "긴장 완화 → 오감 자극 → 정서적 안정 → 자기성찰",
+        curriculum: [
+          { step: 1, title: "Ⅰ. 도입 — 숲과 만나기 (20분)", subtitle: "숲 진입로", desc: "스트레칭 및 3·3·5 숲 호흡" },
+          { step: 2, title: "Ⅱ. 전개 — 오감으로 숲을 느끼기 (50분)", subtitle: "숲속 쉼터", desc: "오감 걷기, 숲 ASMR, 나에게 힘이 되는 나무 찾기" },
+          { step: 3, title: "Ⅲ. 마무리 — 숲의 편안함을 일상으로 (20분)", subtitle: "쉼터", desc: "따뜻한 차 테라피 및 회고" }
+        ],
+        checkpoints: ["산림치유 지도사 직접 방문", "완만한 산책로 활용", "최소비용 300,000원 기준"]
+      },
+      {
+        id: "prod-1",
+        title: "나만의 작은 숲 (미니 정원 · 테라리움)",
+        subTitle: "작은 유리병 속에 나만의 숲을 담아가는 친환경 힐링 공예",
+        category: "자연공예",
+        type: "셀프키트",
+        region: ["가평", "양평"],
+        price: 20000,
+        minCost: 100000,
+        duration: "60분",
+        capacity: "10~20명",
+        days: "매일 운영 가능",
+        timeSlots: "10:00 / 14:00 / 15:00",
+        target: "가족 · 어린이 · 커플",
+        rainy: "좋음 (실내 완벽 대응)",
+        difficulty: "낮음",
+        img: "https://images.unsplash.com/photo-1545241047-6083a3684587?auto=format&fit=crop&w=1000&q=80",
+        imgCaption: "유리병 속에 이끼와 식물을 심어 완성한 미니 테라리움",
+        desc: "유리병 속에 자신만의 생태계를 만들어 집으로 가져가는 실내·외 테이블 공예 프로그램입니다.",
+        effectText: "소근육 발달 → 생태 순환 이해 → 성취감",
+        curriculum: [
+          { step: 1, title: "작은 숲 이야기 (10분)", subtitle: "테이블", desc: "식물과 생태계 기본 원리 이해" },
+          { step: 2, title: "재료 탐색 (10분)", subtitle: "오감 관찰", desc: "마사토, 활성탄, 이끼 관찰" },
+          { step: 3, title: "미니 정원 식재 (30분)", subtitle: "집중 공예", desc: "배수층 구성 및 식물 식재" },
+          { step: 4, title: "이름표 달기 & 교육 (10분)", subtitle: "마무리", desc: "가정 내 돌봄 관리법 안내" }
+        ],
+        checkpoints: ["지도사 없이 키트로 자율 운영", "우천 시 실내 운영 최적", "기념품 소장 만족도 우수"]
+      },
+      {
+        id: "prod-2",
+        title: "숲속 보물찾기",
+        subTitle: "미션 카드를 들고 떠나는 캠핑장 자연 탐정단 놀이",
+        category: "가족 숲놀이",
+        type: "지도사 방문",
+        region: ["가평", "양평"],
+        price: 15000,
+        minCost: 0,
+        duration: "60분",
+        capacity: "10명 이상",
+        days: "금 / 토 / 일",
+        timeSlots: "사전 협의",
+        target: "유아 · 초등 가족",
+        rainy: "제한적",
+        difficulty: "보통",
+        img: "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1000&q=80",
+        imgCaption: "숲속 자연물을 관찰하고 탐험하는 어린이 숲체험",
+        desc: "미션 카드를 통해 자연 속 보물을 찾는 체험형 산림교육 프로그램입니다.",
+        effectText: "자연 관찰력 증진 → 야외 신체활동 → 가족 유대감",
+        curriculum: [
+          { step: 1, title: "숲과 친해지기 (10분)", subtitle: "마당", desc: "몸풀기 스트레칭 및 안전 확인" },
+          { step: 2, title: "미션 보물찾기 (25분)", subtitle: "숲길", desc: "미션 카드 속 자연 요소 찾기" },
+          { step: 3, title: "자연 탐정 미션 (15분)", subtitle: "정밀 관찰", desc: "루페로 곤충 및 식물 탐구" },
+          { step: 4, title: "마무리 (10분)", subtitle: "정리", desc: "소감 나눔 및 자연물 제자리 돌리기" }
+        ],
+        checkpoints: ["숲길 접근성 필수", "지도사 방문 파견", "시설투자 불필요"]
+      },
+      {
+        id: "prod-3",
+        title: "별빛 숲, 마음을 밝히다",
+        subTitle: "야간 오감 힐링 & 별빛 명상 테라피",
+        category: "산림치유",
+        type: "지도사 방문",
+        region: ["가평", "양평"],
+        price: 15000,
+        minCost: 150000,
+        duration: "60분",
+        capacity: "10명 이상",
+        days: "금 / 토 / 일",
+        timeSlots: "19:00 이후",
+        target: "성인 · 커플 · 감성 힐러",
+        rainy: "제한적",
+        difficulty: "보통",
+        img: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1000&q=80",
+        imgCaption: "별빛 아래 고요한 숲길을 걷는 야간 힐링 트레킹",
+        desc: "밤의 숲길을 걸으며 호흡과 명상을 통해 심신을 회복하는 야간 산림치유 프로그램입니다.",
+        effectText: "스트레스 완화 → 오감 이완 → 수면의 질 향상",
+        curriculum: [
+          { step: 1, title: "별빛 숲 야간 산책 (15분)", subtitle: "산책로", desc: "인공 불빛 없이 오감 깨우기" },
+          { step: 2, title: "오감 체험 (10분)", subtitle: "청각 집중", desc: "풀벌레 소리와 밤숲 향기 느끼기" },
+          { step: 3, title: "별빛 호흡명상 (10분)", subtitle: "이완", desc: "싱잉볼 소리와 심신 안정" },
+          { step: 4, title: "차 테라피 & 소원카드 (25분)", subtitle: "마무리", desc: "허브차 시음 및 다짐 작성" }
+        ],
+        checkpoints: ["야간 일정 충돌 없음", "노키즈/성인 캠퍼 만족도 높음", "조명 환경 확인 필요"]
+      }
+    ];
+
+    let currentFilter = { region: 'all', category: 'all', type: 'all' };
+    let compareList = [];
+    let isAdminLoggedIn = false;
+
+    function renderProducts() {
+      const grid = document.getElementById('productGrid');
+      grid.innerHTML = '';
+
+      const filtered = products.filter(p => {
+        const regionMatch = currentFilter.region === 'all' || p.region.includes(currentFilter.region);
+        const catMatch = currentFilter.category === 'all' || p.category === currentFilter.category;
+        const typeMatch = currentFilter.type === 'all' || p.type.includes(currentFilter.type);
+        return regionMatch && catMatch && typeMatch;
+      });
+
+      filtered.forEach(item => {
+        const isChecked = compareList.includes(item.id);
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+          <div style="position:relative;">
+            <img src="${item.img}" class="card-img" alt="${item.title}" onerror="this.onerror=null; this.src='${fallbackImage}';">
+            <div class="card-badges">
+              <span class="badge-tag" style="background:var(--badge-pilot);">파일럿</span>
+              <span class="badge-tag">${item.region.join(' · ')}</span>
+              ${item.isCertified ? `<span class="badge-tag" style="background:var(--badge-cert);">국가인증</span>` : ''}
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-category">${item.category} · ${item.type}</div>
+            <h3 class="card-title">${item.title}</h3>
+            
+            <div class="card-specs">
+              <div class="spec-item"><span>체험비용</span><strong>${item.price.toLocaleString()}원/인</strong></div>
+              <div class="spec-item"><span>소요시간</span><strong>${item.duration}</strong></div>
+              <div class="spec-item"><span>정원</span><strong>${item.capacity}</strong></div>
+              <div class="spec-item"><span>최소비용</span><strong>${item.minCost === 0 ? '없음 (0원)' : item.minCost.toLocaleString() + '원'}</strong></div>
+            </div>
+
+            <div style="margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+              <input type="checkbox" id="chk-${item.id}" ${isChecked ? 'checked' : ''} onchange="toggleCompare('${item.id}')">
+              <label for="chk-${item.id}" style="font-size:0.85rem; color:var(--text-sub); cursor:pointer;">비교함 담기</label>
+            </div>
+
+            <div class="card-actions">
+              <button class="btn btn-outline" onclick="showDetail('${item.id}')">상세보기</button>
+              <button class="btn btn-primary" onclick="openApply('${item.title}')">우리 캠핑장에 신청</button>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function setFilter(type, value, elem) {
+      currentFilter[type] = value;
+      elem.parentNode.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      elem.classList.add('active');
+      renderProducts();
+    }
+
+    function showDetail(id) {
+      const p = products.find(x => x.id === id);
+      const detailContainer = document.getElementById('detailContent');
+      
+      const curriculumHTML = p.curriculum.map(item => `
+        <div class="curriculum-step">
+          <div class="step-badge-num">${item.step}</div>
+          <div class="step-body">
+            <div class="step-header-line">
+              <span class="step-title">${item.title}</span>
+              ${item.subtitle ? `<span class="step-subtitle">${item.subtitle}</span>` : ''}
+            </div>
+            <p class="step-desc">${item.desc}</p>
+          </div>
+        </div>
+      `).join('');
+
+      detailContainer.innerHTML = `
+        <div class="detail-hero-img-wrap">
+          <img src="${p.img}" class="detail-hero-img" alt="${p.title}" onerror="this.onerror=null; this.src='${fallbackImage}';">
+        </div>
+
+        <div class="detail-header">
+          <div style="display:flex; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
+            <span class="badge-tag" style="background:var(--primary);">${p.category}</span>
+            <span class="badge-tag" style="background:var(--primary-light);">${p.type}</span>
+            <span class="badge-tag" style="background:var(--badge-pilot);">${p.region.join(' · ')} 파일럿</span>
+            ${p.isCertified ? `<span class="badge-tag" style="background:var(--badge-cert);">인증 프로그램</span>` : ''}
+          </div>
+          <h1 style="margin: 8px 0 6px 0;">${p.title}</h1>
+          <p style="color:var(--text-sub); font-size:1.1rem;">${p.subTitle}</p>
+          
+          <div class="metrics-grid">
+            <div class="metric-card"><div class="metric-title">1인 체험비용</div><div class="metric-value">${p.price.toLocaleString()}원</div></div>
+            <div class="metric-card"><div class="metric-title">최소 운영비용</div><div class="metric-value">${p.minCost === 0 ? '없음 (0원)' : p.minCost.toLocaleString() + '원'}</div></div>
+            <div class="metric-card"><div class="metric-title">소요시간</div><div class="metric-value">${p.duration}</div></div>
+            <div class="metric-card"><div class="metric-title">적정 정원</div><div class="metric-value">${p.capacity}</div></div>
+            <div class="metric-card"><div class="metric-title">운영 요일</div><div class="metric-value">${p.days}</div></div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h3>프로그램 소개</h3>
+          <p style="line-height:1.75; color:var(--text-sub); font-size:0.98rem;">${p.desc}</p>
+          ${p.effectText ? `<div class="effect-box">🌱 프로그램 핵심 가치 및 효과 : ${p.effectText}</div>` : ''}
+        </div>
+
+        <div class="detail-section">
+          <h3>진행 커리큘럼</h3>
+          <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:16px;">* 현장 환경 및 캠핑장 상황에 맞춰 유동적으로 조율됩니다.</p>
+          <div class="curriculum-list">
+            ${curriculumHTML}
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h3>캠핑장 체크포인트</h3>
+          <ul style="padding-left:20px; color:var(--text-sub); line-height:1.8;">
+            ${p.checkpoints.map(cp => `<li><strong>${cp}</strong></li>`).join('')}
+          </ul>
+        </div>
+
+        <div style="text-align:center; margin-top:32px;">
+          <button class="btn btn-primary" style="padding:16px 60px; font-size:1.1rem;" onclick="openApply('${p.title}')">우리 캠핑장에 신청하기</button>
+        </div>
+      `;
+      navigateTo('detail');
+    }
+
+    function toggleCompare(id) {
+      if (compareList.includes(id)) {
+        compareList = compareList.filter(x => x !== id);
+      } else {
+        if (compareList.length >= 3) {
+          alert('비교 상품은 최대 3개까지만 선택할 수 있습니다.');
+          renderProducts();
+          return;
+        }
+        compareList.push(id);
+      }
+      updateCompareBar();
+    }
+
+    function updateCompareBar() {
+      const bar = document.getElementById('compareBar');
+      const count = document.getElementById('compareCount');
+      count.textContent = compareList.length;
+      if (compareList.length > 0) {
+        bar.classList.add('show');
+      } else {
+        bar.classList.remove('show');
+      }
+    }
+
+    function openCompareModal() {
+      const modal = document.getElementById('compareModal');
+      const table = document.getElementById('modalCompareTable');
+      const selected = products.filter(p => compareList.includes(p.id));
+
+      let headerHTML = '<tr><th>비교 항목</th>' + selected.map(p => `<th>${p.title}</th>`).join('') + '</tr>';
+      let rowCategory = '<tr><td>분야</td>' + selected.map(p => `<td>${p.category}</td>`).join('') + '</tr>';
+      let rowType = '<tr><td>운영형태</td>' + selected.map(p => `<td>${p.type}</td>`).join('') + '</tr>';
+      let rowPrice = '<tr><td>체험비용(인)</td>' + selected.map(p => `<td>${p.price.toLocaleString()}원</td>`).join('') + '</tr>';
+      let rowMinCost = '<tr><td>최소비용</td>' + selected.map(p => `<td>${p.minCost === 0 ? '없음' : p.minCost.toLocaleString() + '원'}</td>`).join('') + '</tr>';
+      let rowDuration = '<tr><td>소요시간</td>' + selected.map(p => `<td>${p.duration}</td>`).join('') + '</tr>';
+      let rowTarget = '<tr><td>권장대상</td>' + selected.map(p => `<td>${p.target}</td>`).join('') + '</tr>';
+      let rowRain = '<tr><td>우천 대응</td>' + selected.map(p => `<td>${p.rainy}</td>`).join('') + '</tr>';
+      let rowDiff = '<tr><td>운영 난이도</td>' + selected.map(p => `<td>${p.difficulty}</td>`).join('') + '</tr>';
+
+      table.innerHTML = headerHTML + rowCategory + rowType + rowPrice + rowMinCost + rowDuration + rowTarget + rowRain + rowDiff;
+      modal.classList.add('show');
+    }
+
+    function closeCompareModal() {
+      document.getElementById('compareModal').classList.remove('show');
+    }
+
+    function openApply(prodTitle) {
+      document.getElementById('apply-program-name').value = prodTitle;
+      navigateTo('apply');
+    }
+
+    // [신청서 제출 로직] 구글 스프레드시트 중앙 DB로 실시간 전송
+    async function handleApplySubmit(e) {
+      e.preventDefault();
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = '신청 데이터를 전송 중입니다...';
+
+      const selectedEnv = Array.from(document.querySelectorAll('input[name="env"]:checked')).map(el => el.value);
+
+      const newApp = {
+        id: "APP-" + Date.now().toString().slice(-6),
+        date: new Date().toISOString().split('T')[0],
+        campName: document.getElementById('camp-name').value,
+        region: document.getElementById('camp-region').value,
+        manager: document.getElementById('camp-manager').value,
+        phone: document.getElementById('camp-phone').value,
+        program: document.getElementById('apply-program-name').value,
+        planDate: document.getElementById('camp-date').value,
+        capacity: document.getElementById('camp-capacity').value,
+        env: selectedEnv,
+        memo: document.getElementById('camp-memo').value,
+        status: '신청접수'
+      };
+
+      try {
+        if (GOOGLE_SCRIPT_URL && !GOOGLE_SCRIPT_URL.includes("여기에")) {
+          await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newApp)
+          });
+        }
+      } catch (err) {
+        console.warn("스프레드시트 전송 경고 (오프라인/CORS):", err);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '연계서비스 신청 완료하기';
+
+        document.getElementById('successReceipt').innerHTML = `
+          <div style="font-size:0.9rem; line-height: 1.8;">
+            <div><strong>접수 번호:</strong> ${newApp.id}</div>
+            <div><strong>신청 프로그램:</strong> <span style="color:var(--primary); font-weight:700;">${newApp.program}</span></div>
+            <div><strong>신청 캠핑장:</strong> ${newApp.campName} (${newApp.region})</div>
+            <div><strong>담당자 / 연락처:</strong> ${newApp.manager} (${newApp.phone})</div>
+            <div><strong>희망 운영일:</strong> ${newApp.planDate} / 예상 ${newApp.capacity}명</div>
+            <div><strong>진행 상태:</strong> <span style="background:#e3f2fd; color:#1976d2; padding:2px 8px; border-radius:4px; font-weight:700;">신청접수 완료</span></div>
+          </div>
+        `;
+
+        document.getElementById('applyForm').reset();
+        navigateTo('success');
+      }
+    }
+
+    // [운영 관리자 인증 & 클라우드 데이터 로딩]
+    function openAdminModal() {
+      if (isAdminLoggedIn) {
+        navigateTo('admin');
+        fetchAdminApplications();
+      } else {
+        document.getElementById('adminPasswordInput').value = '';
+        document.getElementById('adminLoginModal').classList.add('show');
+      }
+    }
+
+    function closeAdminModal() {
+      document.getElementById('adminLoginModal').classList.remove('show');
+    }
+
+    function handleAdminLogin(e) {
+      e.preventDefault();
+      const pw = document.getElementById('adminPasswordInput').value;
+      if (pw === 'Net0521') {
+        isAdminLoggedIn = true;
+        closeAdminModal();
+        alert('관리자 인증에 성공하였습니다.');
+        document.getElementById('nav-admin-btn').textContent = '⚙️ 관리자 모드 중';
+        document.getElementById('nav-admin-btn').style.borderColor = 'var(--primary)';
+        navigateTo('admin');
+        fetchAdminApplications();
+      } else {
+        alert('비밀번호가 일치하지 않습니다.');
+      }
+    }
+
+    function adminLogout() {
+      if (confirm('관리자 모드를 종료하시겠습니까?')) {
+        isAdminLoggedIn = false;
+        document.getElementById('nav-admin-btn').textContent = '🔒 운영 관리자';
+        document.getElementById('nav-admin-btn').style.borderColor = 'var(--border-color)';
+        navigateTo('list');
+      }
+    }
+
+    // 관리자: 스프레드시트 중앙 DB에서 모든 캠핑장 신청 데이터 조회
+    async function fetchAdminApplications() {
+      const tbody = document.getElementById('adminTableBody');
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px;">클라우드에서 최신 데이터를 불러오는 중입니다...</td></tr>`;
+
+      if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("여기에")) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:#e53e3e;">
+          <strong>구글 스프레드시트 URL이 아직 등록되지 않았습니다.</strong><br>
+          안내드린 가이드의 3단계 URL을 코드에 붙여넣어 주시면 전 캠핑장의 신청 내역이 실시간 연동됩니다.
+        </td></tr>`;
+        return;
+      }
+
+      try {
+        const res = await fetch(GOOGLE_SCRIPT_URL);
+        const apps = await res.json();
+
+        if (!apps || apps.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--text-muted);">접수된 신청 내역이 없습니다.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = apps.reverse().map(a => `
+          <tr>
+            <td>
+              <div style="font-weight:600;">${a.id}</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">${a.date}</div>
+            </td>
+            <td>
+              <strong>${a.campName}</strong>
+              <div style="font-size:0.78rem; color:var(--text-sub);">${a.region}군</div>
+            </td>
+            <td>
+              <div>${a.manager}</div>
+              <div style="font-size:0.8rem; color:var(--text-muted);">${a.phone}</div>
+            </td>
+            <td style="max-width:200px; font-weight:600; color:var(--primary);">${a.program}</td>
+            <td>
+              <div>${a.planDate}</div>
+              <div style="font-size:0.8rem; color:var(--text-sub);">${a.capacity}명</div>
+            </td>
+            <td style="font-size:0.8rem; color:var(--text-sub); max-width:180px;">
+              <div><strong>환경:</strong> ${(a.env && a.env.length > 0) ? a.env.join(', ') : '기본'}</div>
+              <div><strong>메모:</strong> ${a.memo || '-'}</div>
+            </td>
+            <td>
+              <span style="background:#e3f2fd; color:#1976d2; padding:3px 8px; border-radius:4px; font-weight:700; font-size:0.82rem;">
+                ${a.status || '신청접수'}
+              </span>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:#e53e3e;">데이터를 가져오는데 실패했습니다. 구글 시트 권한(모든 사용자 허용)을 확인해주세요.</td></tr>`;
+      }
+    }
+
+    function navigateTo(viewId) {
+      document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
+      document.getElementById(`view-${viewId}`).classList.add('active');
+
+      if (viewId === 'list') {
+        document.getElementById('nav-list').classList.add('active');
+      } else {
+        document.getElementById('nav-list').classList.remove('active');
+      }
+      window.scrollTo(0, 0);
+    }
+
+    window.onload = function() {
+      renderProducts();
+    };
+  </script>
+</body>
+</html>
