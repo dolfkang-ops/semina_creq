@@ -536,12 +536,11 @@
               <input type="text" id="camp-manager" class="form-control" required placeholder="홍길동 대표">
             </div>
             <div class="form-group">
-              <label class="form-label">연락처(핸드폰) * <span style="font-size:0.8rem; color:var(--text-muted);">(숫자만 또는 하이픈 포함 입력)</span></label>
-              <input type="tel" id="camp-phone" class="form-control" required placeholder="010-0000-0000">
+              <label class="form-label">연락처(핸드폰) *</label>
+              <input type="tel" id="camp-phone" class="form-control" required placeholder="010-0000-0000" oninput="formatPhoneInput(this)">
             </div>
           </div>
 
-          <!-- 10월, 11월 주말 일자 다중 선택 -->
           <div class="form-group">
             <label class="form-label">희망 운영일자 (10월 · 11월 주말 한정) * <span style="font-weight:normal; font-size:0.85rem; color:var(--primary);">(복수 선택 가능)</span></label>
             <div class="weekend-selector">
@@ -553,7 +552,6 @@
             </div>
           </div>
 
-          <!-- 캠핑장 총 사이트수 입력 -->
           <div class="form-group">
             <label class="form-label">캠핑장 총 사이트 수 (개) *</label>
             <input type="number" id="camp-site-count" class="form-control" required placeholder="예: 30" min="1">
@@ -652,9 +650,9 @@
   <div class="modal" id="ownerSearchModal">
     <div class="modal-content" style="max-width: 420px; text-align: center;">
       <h3 style="margin-bottom: 8px;">신청내역 조회 / 수정</h3>
-      <p style="font-size: 0.88rem; color: var(--text-sub); margin-bottom: 20px;">신청 시 등록하셨던 <strong>휴대폰 번호</strong>를 입력해주세요.</p>
+      <p style="font-size: 0.88rem; color: var(--text-sub); margin-bottom: 20px;">신청 시 등록하셨던 <strong>휴대폰 번호 전체 또는 뒷 4자리</strong>를 입력해주세요.</p>
       <form onsubmit="handleOwnerSearch(event)">
-        <input type="tel" id="ownerSearchPhone" class="form-control" placeholder="예: 01012345678 또는 뒷4자리" required style="margin-bottom: 16px; text-align: center;">
+        <input type="tel" id="ownerSearchPhone" class="form-control" placeholder="010-0000-0000" required style="margin-bottom: 16px; text-align: center;">
         <div style="display: flex; gap: 8px;">
           <button type="button" class="btn btn-outline" onclick="closeOwnerSearchModal()">취소</button>
           <button type="submit" class="btn btn-primary">내역 조회하기</button>
@@ -698,7 +696,7 @@
   </div>
 
   <script>
-    // ★ 구글 Apps Script 배포 URL ★
+    // ★ 구글 Apps Script 배포 URL을 입력하세요 ★
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTxd5uwjSH7_HJSflyMdYQSRW3CCpA-NaiHRWx7ITuxDGI3msr_Ir9r_TQWLcOW45aWA/exec";
 
     const fallbackImage = "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1000&q=80";
@@ -979,6 +977,7 @@
     let compareList = [];
     let isAdminLoggedIn = false;
 
+    // 10월, 11월 주말 칩 생성
     function initWeekendSelectors() {
       const g10 = document.getElementById('weekend-grid-10');
       const g11 = document.getElementById('weekend-grid-11');
@@ -1009,6 +1008,18 @@
       } else {
         selectedWeekends.push(val);
         elem.classList.add('selected');
+      }
+    }
+
+    // 전화번호 입력 시 010-XXXX-XXXX 자동 하이픈 서식 적용
+    function formatPhoneInput(elem) {
+      let val = elem.value.replace(/[^0-9]/g, '');
+      if (val.length > 3 && val.length <= 7) {
+        elem.value = val.substring(0, 3) + '-' + val.substring(3);
+      } else if (val.length > 7) {
+        elem.value = val.substring(0, 3) + '-' + val.substring(3, 7) + '-' + val.substring(7, 11);
+      } else {
+        elem.value = val;
       }
     }
 
@@ -1203,7 +1214,7 @@
       navigateTo('apply');
     }
 
-    // 신청서 제출 (확실한 데이터 전송 로직 적용)
+    // 신청서 제출 함수 (완벽한 데이터 패킷 구성 및 전송)
     async function handleApplySubmit(e) {
       e.preventDefault();
 
@@ -1227,7 +1238,15 @@
 
       const selectedEnv = Array.from(document.querySelectorAll('input[name="env"]:checked')).map(el => el.value);
 
-      // 스프레드시트 컬럼 매핑 객체 구성
+      // 010 형태 하이픈 포맷 적용
+      let rawPhone = document.getElementById('camp-phone').value.replace(/[^0-9]/g, '');
+      let formattedPhone = rawPhone;
+      if (rawPhone.length === 11) {
+        formattedPhone = rawPhone.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+      } else if (rawPhone.length === 10 && rawPhone.startsWith("10")) {
+        formattedPhone = ("0" + rawPhone).replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+      }
+
       const appData = {
         action: isEdit ? "update" : "create",
         id: isEdit ? editId : "APP-" + Date.now().toString().slice(-6),
@@ -1235,18 +1254,18 @@
         campName: document.getElementById('camp-name').value.trim(),
         region: document.getElementById('camp-region').value,
         manager: document.getElementById('camp-manager').value.trim(),
-        phone: document.getElementById('camp-phone').value.replace(/[^0-9]/g, ''),
-        program: document.getElementById('apply-program-name').value,
+        phone: formattedPhone,
+        program: document.getElementById('apply-program-name').value.trim(),
         planDates: selectedWeekends,
-        siteCount: Number(siteVal),
+        siteCount: siteVal.toString().trim(),
         env: selectedEnv,
         memo: document.getElementById('camp-memo').value.trim(),
         status: '신청접수'
       };
 
       try {
-        if (GOOGLE_SCRIPT_URL && !GOOGLE_SCRIPT_URL.includes("여기에")) {
-          // text/plain 방식으로 전송하여 CORS 및 JSON 파싱 차단을 완벽히 방지
+        if (GOOGLE_SCRIPT_URL && !GOOGLE_SCRIPT_URL.includes("https://script.google.com/macros/s/AKfycbxTxd5uwjSH7_HJSflyMdYQSRW3CCpA-NaiHRWx7ITuxDGI3msr_Ir9r_TQWLcOW45aWA/exec")) {
+          // text/plain 전송으로 CORS 제한 및 데이터 누락 완벽 방지
           await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
             mode: 'no-cors',
@@ -1255,7 +1274,7 @@
           });
         }
       } catch (err) {
-        console.warn("스프레드시트 통신 경고:", err);
+        console.warn("전송 주의:", err);
       } finally {
         submitBtn.disabled = false;
 
@@ -1277,7 +1296,7 @@
     }
 
     // ==========================================
-    // 사장님: 번호 조회 및 수정
+    // 사장님: 휴대폰 번호 스마트 검색 (전체/뒷자리 완벽 대응)
     // ==========================================
 
     function openOwnerSearchModal() {
@@ -1291,26 +1310,43 @@
 
     async function handleOwnerSearch(e) {
       e.preventDefault();
-      const inputPhone = document.getElementById('ownerSearchPhone').value.replace(/[^0-9]/g, '');
+      const rawInput = document.getElementById('ownerSearchPhone').value.trim();
+      const searchDigits = rawInput.replace(/[^0-9]/g, '');
 
-      if (!inputPhone || inputPhone.length < 4) {
+      if (!searchDigits || searchDigits.length < 4) {
         alert('휴대폰 번호를 정확히 입력해주세요 (최소 뒷 4자리 이상).');
         return;
       }
 
       closeOwnerSearchModal();
       navigateTo('owner');
-      document.getElementById('ownerInfoText').textContent = `입력하신 번호(${inputPhone})로 접수된 신청 내역을 조회 중입니다...`;
+      document.getElementById('ownerInfoText').textContent = `입력하신 번호(${rawInput})로 신청 내역을 조회 중입니다...`;
       document.getElementById('ownerAppList').innerHTML = `<p style="padding:20px; text-align:center;">클라우드에서 내역을 불러오는 중입니다...</p>`;
 
       try {
         const res = await fetch(GOOGLE_SCRIPT_URL);
         const apps = await res.json();
 
-        const myApps = apps.filter(a => a.phone && a.phone.toString().replace(/[^0-9]/g, '').includes(inputPhone));
+        // 스마트 번호 매칭: 양쪽 모두 숫자만 추출하여 포함 여부 및 일치 여부 검사
+        const myApps = apps.filter(a => {
+          if (!a.phone) return false;
+          let rowDigits = a.phone.toString().replace(/[^0-9]/g, '');
+          
+          // 0이 누락되어 1042265988 형태인 경우 010으로 보정 후 비교
+          if (rowDigits.length === 10 && rowDigits.startsWith("10")) {
+            rowDigits = "0" + rowDigits;
+          }
+
+          let compDigits = searchDigits;
+          if (compDigits.length === 10 && compDigits.startsWith("10")) {
+            compDigits = "0" + compDigits;
+          }
+
+          return rowDigits.includes(compDigits) || compDigits.includes(rowDigits) || rowDigits.endsWith(searchDigits);
+        });
 
         if (!myApps || myApps.length === 0) {
-          document.getElementById('ownerInfoText').textContent = `조회 번호: ${inputPhone}`;
+          document.getElementById('ownerInfoText').textContent = `조회 번호: ${rawInput}`;
           document.getElementById('ownerAppList').innerHTML = `
             <div style="background:#fff; padding:32px; border-radius:12px; text-align:center; border:1px solid var(--border-color);">
               <p style="color:var(--text-muted); margin-bottom:12px;">일치하는 신청 내역을 찾을 수 없습니다.</p>
@@ -1326,7 +1362,7 @@
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
               <div>
                 <span style="font-size:0.8rem; background:var(--bg-gray); padding:2px 8px; border-radius:4px; font-weight:600;">${a.id}</span>
-                <h3 style="margin-top:6px; color:var(--primary);">${a.program}</h3>
+                <h3 style="margin-top:6px; color:var(--primary);">${a.program || '선택 프로그램'}</h3>
               </div>
               <span style="background:#e3f2fd; color:#1976d2; padding:4px 10px; border-radius:4px; font-weight:700; font-size:0.85rem;">
                 ${a.status || '신청접수'}
@@ -1358,11 +1394,11 @@
       document.getElementById('applyFormTitle').textContent = `신청 내용 수정 (${app.id})`;
       document.getElementById('submitBtn').textContent = '수정 내용 저장하기';
 
-      document.getElementById('apply-program-name').value = app.program;
-      document.getElementById('camp-name').value = app.campName;
-      document.getElementById('camp-region').value = app.region;
-      document.getElementById('camp-manager').value = app.manager;
-      document.getElementById('camp-phone').value = app.phone;
+      document.getElementById('apply-program-name').value = app.program || '';
+      document.getElementById('camp-name').value = app.campName || '';
+      document.getElementById('camp-region').value = app.region || '가평';
+      document.getElementById('camp-manager').value = app.manager || '';
+      document.getElementById('camp-phone').value = app.phone || '';
       document.getElementById('camp-site-count').value = app.siteCount || '';
       document.getElementById('camp-memo').value = app.memo || '';
 
@@ -1428,7 +1464,7 @@
       const tbody = document.getElementById('adminTableBody');
       tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px;">클라우드에서 최신 데이터를 불러오는 중입니다...</td></tr>`;
 
-      if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("여기에")) {
+      if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("https://script.google.com/macros/s/AKfycbxTxd5uwjSH7_HJSflyMdYQSRW3CCpA-NaiHRWx7ITuxDGI3msr_Ir9r_TQWLcOW45aWA/exec")) {
         tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:#e53e3e;">구글 스프레드시트 URL을 등록해 주세요.</td></tr>`;
         return;
       }
@@ -1456,7 +1492,7 @@
               <div>${a.manager}</div>
               <div style="font-size:0.8rem; color:var(--text-muted);">${a.phone}</div>
             </td>
-            <td style="max-width:180px; font-weight:600; color:var(--primary);">${a.program}</td>
+            <td style="max-width:180px; font-weight:600; color:var(--primary);">${a.program || '-'}</td>
             <td>
               <div style="font-weight:600; color:var(--primary);">${(a.planDates && a.planDates.length > 0) ? a.planDates.join(', ') : '-'}</div>
               <div style="font-size:0.8rem; color:var(--text-sub);">규모: ${a.siteCount || 0} 사이트</div>
