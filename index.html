@@ -42,6 +42,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
     }
     .logo {
       font-size: 1.25rem;
@@ -52,7 +54,7 @@
       align-items: center;
       gap: 8px;
     }
-    .nav-links { display: flex; gap: 12px; align-items: center; }
+    .nav-links { display: flex; gap: 8px; align-items: center; }
     .btn-nav {
       background: none;
       border: none;
@@ -68,10 +70,10 @@
       color: var(--primary);
       background-color: var(--accent);
     }
-    .btn-admin-login {
+    .btn-nav-outline {
       border: 1px solid var(--border-color);
-      padding: 6px 12px;
-      font-size: 0.85rem;
+      padding: 7px 12px;
+      font-size: 0.88rem;
       border-radius: var(--radius-sm);
       color: var(--text-sub);
       cursor: pointer;
@@ -292,7 +294,6 @@
       display: flex;
       flex-direction: column;
       gap: 16px;
-      position: relative;
     }
     .curriculum-step {
       display: flex;
@@ -335,17 +336,6 @@
     }
     .step-desc { font-size: 0.92rem; color: var(--text-sub); line-height: 1.6; }
 
-    .effect-box {
-      background: #f1f8f3;
-      border-left: 4px solid var(--primary-light);
-      padding: 14px 18px;
-      border-radius: var(--radius-sm);
-      margin-top: 16px;
-      font-size: 0.92rem;
-      color: var(--primary);
-      font-weight: 600;
-    }
-
     /* Form Styles */
     .form-group { margin-bottom: 20px; }
     .form-label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.95rem; }
@@ -362,6 +352,44 @@
       gap: 12px;
     }
     .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
+
+    /* 10월, 11월 주말 일자 칩 선택기 */
+    .weekend-selector {
+      background: var(--bg-gray);
+      border: 1px solid var(--border-color);
+      padding: 16px;
+      border-radius: var(--radius-sm);
+      margin-top: 6px;
+    }
+    .weekend-month-title {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+    .weekend-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .weekend-chip {
+      background: #fff;
+      border: 1px solid var(--border-color);
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s;
+    }
+    .weekend-chip.selected {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      font-weight: 600;
+    }
 
     /* Modals */
     .modal {
@@ -407,6 +435,16 @@
       border-bottom: 1px solid var(--border-color);
       vertical-align: middle;
     }
+
+    /* 사장님 마이페이지 카드 */
+    .owner-app-card {
+      background: #fff;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
   </style>
 </head>
 <body>
@@ -417,8 +455,9 @@
         🌲 <span>산림복지 × 캠핑장 매칭</span>
       </div>
       <div class="nav-links">
-        <button class="btn-nav active" id="nav-list" onclick="navigateTo('list')">체험 프로그램 탐색</button>
-        <button class="btn-admin-login" id="nav-admin-btn" onclick="openAdminModal()">🔒 운영 관리자</button>
+        <button class="btn-nav active" id="nav-list" onclick="navigateTo('list')">프로그램 둘러보기</button>
+        <button class="btn-nav-outline" onclick="openOwnerSearchModal()">🔍 내 신청 확인/수정</button>
+        <button class="btn-nav-outline" id="nav-admin-btn" onclick="openAdminModal()">🔒 운영 관리자</button>
       </div>
     </div>
   </header>
@@ -428,7 +467,7 @@
     <!-- 1. 메인 목록 페이지 -->
     <main id="view-list" class="view-panel active">
       <div class="hero-banner">
-        <span class="badge">가평 · 양평 파일럿 사업</span>
+        <span class="badge">가평 · 양평 파일럿 사업 (10~11월 주말 한정)</span>
         <h1>캠핑장에 새로운 자연 경험을 더하세요</h1>
         <p>검증된 산림복지전문업의 숲체험 프로그램을 선택하고, 간편하게 캠핑장 연계 서비스를 신청하세요.</p>
       </div>
@@ -471,15 +510,17 @@
       <div id="detailContent"></div>
     </section>
 
-    <!-- 3. 캠핑장 연계 신청 페이지 -->
+    <!-- 3. 캠핑장 연계 신청 / 수정 페이지 -->
     <section id="view-apply" class="view-panel">
       <div class="detail-header">
-        <h2>캠핑장 연계서비스 신청</h2>
-        <p style="color:var(--text-sub); margin-top:4px;">신청서를 작성해주시면 땡큐캠핑 운영자가 전문업체와 검토 후 1 영업일 내 연락드립니다.</p>
+        <h2 id="applyFormTitle">캠핑장 연계서비스 신청</h2>
+        <p style="color:var(--text-sub); margin-top:4px;">10월~11월 주말 일정 및 캠핑장 사이트 수를 입력해주시면 전문업체와 조율 후 신속히 연락드립니다.</p>
       </div>
 
       <div class="detail-section">
         <form id="applyForm" onsubmit="handleApplySubmit(event)">
+          <input type="hidden" id="edit-app-id" value="">
+
           <div class="form-group">
             <label class="form-label">선택한 프로그램</label>
             <input type="text" id="apply-program-name" class="form-control" readonly style="background:#f1f3f5; font-weight:bold;">
@@ -501,30 +542,38 @@
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
             <div class="form-group">
-              <label class="form-label">담당자명 *</label>
+              <label class="form-label">담당자(대표자) 성함 *</label>
               <input type="text" id="camp-manager" class="form-control" required placeholder="홍길동 대표">
             </div>
             <div class="form-group">
-              <label class="form-label">연락처 *</label>
+              <label class="form-label">연락처(핸드폰) * <span style="font-size:0.8rem; color:var(--text-muted);">(추후 신청 수정 시 확인용)</span></label>
               <input type="tel" id="camp-phone" class="form-control" required placeholder="010-0000-0000">
             </div>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-            <div class="form-group">
-              <label class="form-label">희망 운영일자 *</label>
-              <input type="date" id="camp-date" class="form-control" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label">예상 참여인원 *</label>
-              <input type="number" id="camp-capacity" class="form-control" required placeholder="권장 인원 참고">
+          <!-- 개편 1: 10월, 11월 주말 일자 다중 선택 -->
+          <div class="form-group">
+            <label class="form-label">희망 운영일자 (10월 · 11월 주말 한정) * <span style="font-weight:normal; font-size:0.85rem; color:var(--primary);">(복수 선택 가능)</span></label>
+            <div class="weekend-selector">
+              <div class="weekend-month-title">📅 2026년 10월 주말</div>
+              <div class="weekend-grid" id="weekend-grid-10"></div>
+
+              <div class="weekend-month-title" style="margin-top:12px;">📅 2026년 11월 주말</div>
+              <div class="weekend-grid" id="weekend-grid-11"></div>
             </div>
           </div>
 
+          <!-- 개편 2: 캠핑장 총 사이트수 입력 -->
           <div class="form-group">
-            <label class="form-label">캠핑장 운영환경 확인 (중복 선택 가능)</label>
+            <label class="form-label">캠핑장 총 사이트 수 (개) *</label>
+            <input type="number" id="camp-site-count" class="form-control" required placeholder="예: 30" min="1">
+            <p style="font-size:0.82rem; color:var(--text-muted); margin-top:4px;">* 전체 사이트 규모에 맞춰 적정 강사 파견 인원과 키트 배송 수량을 산정합니다.</p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">캠핑장 보유 인프라 (중복 선택 가능)</label>
             <div class="checkbox-grid">
-              <label class="checkbox-item"><input type="checkbox" name="env" value="실내 공간"> 실내 테이블 공간 보유</label>
+              <label class="checkbox-item"><input type="checkbox" name="env" value="실내 테이블"> 실내 테이블 공간 보유</label>
               <label class="checkbox-item"><input type="checkbox" name="env" value="야외 테이블"> 야외 테이블 공간 보유</label>
               <label class="checkbox-item"><input type="checkbox" name="env" value="숲길 접근"> 주변 숲길/산책로 접근 가능</label>
               <label class="checkbox-item"><input type="checkbox" name="env" value="야간 조명"> 야간 안전 이동로 확보</label>
@@ -535,7 +584,7 @@
 
           <div class="form-group">
             <label class="form-label">추가 요청사항</label>
-            <textarea id="camp-memo" class="form-control" rows="3" placeholder="일정 조율, 희망 시간대(오전/오후/야간) 등 자유롭게 적어주세요."></textarea>
+            <textarea id="camp-memo" class="form-control" rows="3" placeholder="희망 시간대(오전/오후/야간), 패키지 구성 등 자유롭게 적어주세요."></textarea>
           </div>
 
           <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 1.05rem;">연계서비스 신청 완료하기</button>
@@ -543,29 +592,43 @@
       </div>
     </section>
 
-    <!-- 4. 캠핑장 전용: 신청 완료 안내 뷰 -->
+    <!-- 4. 신청 완료 안내 뷰 -->
     <section id="view-success" class="view-panel">
       <div class="detail-header" style="text-align: center; padding: 48px 24px;">
         <div style="font-size: 3rem; margin-bottom: 12px;">🎉</div>
-        <h2 style="color: var(--primary);">연계서비스 신청이 정상 접수되었습니다</h2>
+        <h2 style="color: var(--primary);" id="successTitle">연계서비스 신청이 접수되었습니다</h2>
         <p style="color: var(--text-sub); margin-top: 8px; font-size: 1.05rem;">
           제출해주신 내용은 운영본부로 실시간 전송되었으며, 전문업체와 일정 확인 후 빠르게 안내드리겠습니다.
         </p>
 
-        <div id="successReceipt" style="max-width: 500px; margin: 28px auto; text-align: left; background: var(--bg-gray); padding: 20px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);"></div>
+        <div id="successReceipt" style="max-width: 540px; margin: 28px auto; text-align: left; background: var(--bg-gray); padding: 20px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);"></div>
 
-        <div style="margin-top: 32px;">
-          <button class="btn btn-primary" style="max-width: 240px;" onclick="navigateTo('list')">다른 프로그램 더 둘러보기</button>
+        <div style="margin-top: 24px; display:flex; gap:12px; justify-content:center;">
+          <button class="btn btn-outline" style="max-width: 200px;" onclick="navigateTo('list')">프로그램 목록</button>
+          <button class="btn btn-primary" style="max-width: 200px;" onclick="openOwnerSearchModal()">내 신청내역 관리</button>
         </div>
       </div>
     </section>
 
-    <!-- 5. 운영 관리자 전용: 신청 관리 대시보드 -->
+    <!-- 5. 사장님 신청내역 확인 및 수정 대시보드 -->
+    <section id="view-owner" class="view-panel">
+      <div class="detail-header" style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <h2>캠핑장 신청 내역 관리</h2>
+          <p style="color:var(--text-sub); margin-top:4px;" id="ownerInfoText"></p>
+        </div>
+        <button class="btn btn-outline" onclick="navigateTo('list')" style="max-width:140px;">← 메인으로</button>
+      </div>
+
+      <div id="ownerAppList"></div>
+    </section>
+
+    <!-- 6. 운영 관리자 전용 대시보드 -->
     <section id="view-admin" class="view-panel">
       <div class="detail-header" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
         <div>
           <h2>운영 관리자 대시보드</h2>
-          <p style="color: var(--text-sub); margin-top: 4px;">클라우드 스프레드시트에 영구 저장된 전체 캠핑장 신청 내역을 조회합니다.</p>
+          <p style="color: var(--text-sub); margin-top: 4px;">가평·양평 전역 캠핑장 신청 데이터를 실시간으로 확인합니다.</p>
         </div>
         <div style="display: flex; gap: 8px;">
           <button class="btn btn-outline" onclick="fetchAdminApplications()" style="font-size:0.85rem; padding: 8px 14px;">🔄 새로고침</button>
@@ -581,7 +644,7 @@
               <th>캠핑장명 (지역)</th>
               <th>담당자 / 연락처</th>
               <th>신청 프로그램</th>
-              <th>희망일 / 인원</th>
+              <th>희망 주말 / 사이트수</th>
               <th>보유환경 / 메모</th>
               <th>진행 상태</th>
             </tr>
@@ -593,6 +656,21 @@
       </div>
     </section>
 
+  </div>
+
+  <!-- 사장님 번호 확인 모달 -->
+  <div class="modal" id="ownerSearchModal">
+    <div class="modal-content" style="max-width: 420px; text-align: center;">
+      <h3 style="margin-bottom: 8px;">신청내역 조회 / 수정</h3>
+      <p style="font-size: 0.88rem; color: var(--text-sub); margin-bottom: 20px;">신청 시 등록하셨던 <strong>휴대폰 번호</strong>를 입력해주세요.</p>
+      <form onsubmit="handleOwnerSearch(event)">
+        <input type="tel" id="ownerSearchPhone" class="form-control" placeholder="예: 01012345678 또는 뒷4자리" required style="margin-bottom: 16px; text-align: center;">
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn btn-outline" onclick="closeOwnerSearchModal()">취소</button>
+          <button type="submit" class="btn btn-primary">내역 조회하기</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <!-- 관리자 로그인 모달 -->
@@ -630,13 +708,24 @@
   </div>
 
   <script>
-    // =========================================================================
-    // ★ [중요] 아래 URL에 배포하신 구글 웹 앱 URL을 붙여넣어 주세요! ★
-    // =========================================================================
+    // ★ 구글 Apps Script 웹 앱 배포 URL을 입력하세요 ★
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTxd5uwjSH7_HJSflyMdYQSRW3CCpA-NaiHRWx7ITuxDGI3msr_Ir9r_TQWLcOW45aWA/exec";
 
     const fallbackImage = "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1000&q=80";
 
+    // 2026년 10월, 11월 주말 일자 정의
+    const weekends10 = [
+      "10.03(토)", "10.04(일)", "10.10(토)", "10.11(일)",
+      "10.17(토)", "10.18(일)", "10.24(토)", "10.25(일)", "10.31(토)"
+    ];
+    const weekends11 = [
+      "11.01(일)", "11.07(토)", "11.08(일)", "11.14(토)", "11.15(일)",
+      "11.21(토)", "11.22(일)", "11.28(토)", "11.29(일)"
+    ];
+
+    let selectedWeekends = [];
+
+    // 상품 10종 데이터
     const products = [
       {
         id: "prod-little-exp",
@@ -649,26 +738,24 @@
         minCost: 125000,
         duration: "90분",
         capacity: "5~15명",
-        days: "토요일",
+        days: "10~11월 토요일",
         timeSlots: "14:00~15:30 (토요일 집중 운영)",
         target: "유아 · 초등 가족",
         rainy: "제한적 (우천 시 대체 공간)",
         difficulty: "보통",
         img: "https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?auto=format&fit=crop&w=1000&q=80",
-        imgCaption: "숲속 자연물을 관찰하고 교감하며 오감을 깨우는 숲속 꼬마 탐험대",
-        desc: "캠핑장 자체가 거대한 교실이 됩니다. 스마트폰과 게임기 대신 나뭇가지, 돌멩이, 흙을 만지며 스스로 놀이 규칙을 만드는 '언플러그드(Unplugged)' 놀이 학교입니다. 생태 전문가와 함께 자연의 미세한 숨소리를 관찰하고, 숲에서 얻은 부산물로 나만의 예술 작품을 빚어내는 친환경 '에코 크래프트'를 결합했습니다.",
-        effectText: "언플러그드 힐링 → 자연 친화 에코 크래프트 → 두뇌 발달 및 상상력 자극",
+        desc: "캠핑장 자체가 거대한 교실이 됩니다. 스마트폰 대신 자연물을 만지며 스스로 규칙을 만드는 언플러그드 놀이와 에코 크래프트 활동입니다.",
         curriculum: [
-          { step: 1, title: "1. [감각 깨우기] 숲의 숨소리에 귀 기울이기 (20분)", subtitle: "오감 열기", desc: "숲의 다양한 소리를 수집하고, 눈을 감고 바람의 냄새를 맡으며 굳어있던 감각을 깨웁니다." },
-          { step: 2, title: "2. [탐험하기] 자연 속 보물찾기 (35분)", subtitle: "관찰력 집중", desc: "\"세상에서 가장 예쁜 색깔의 나뭇잎 찾기\", \"하트 모양 돌멩이 찾기\" 등 미션을 수행합니다." },
-          { step: 3, title: "3. [창조하기] 자연물로 만드는 나만의 예술 (35분)", subtitle: "에코 크래프트", desc: "나뭇가지로 가족 얼굴 만들기, 나무구슬 팔찌, 부채, 솔방울 인형 등 에코 크래프트 창작 활동" }
+          { step: 1, title: "1. 숲의 숨소리 듣기 (20분)", subtitle: "오감 열기", desc: "굳어있던 오감을 깨우고 바람과 숲의 소리에 귀 기울이기" },
+          { step: 2, title: "2. 자연 속 보물찾기 (35분)", subtitle: "생태 탐색", desc: "하트 돌멩이, 예쁜 잎사귀 등 미션을 수행하며 관찰력 향상" },
+          { step: 3, title: "3. 에코 크래프트 창작 (35분)", subtitle: "자연물 공예", desc: "자연 부산물로 가족 얼굴, 나무구슬 팔찌, 솔방울 인형 제작" }
         ],
-        checkpoints: ["텐트 문을 열면 바로 시작되는 캠핑장 밀착형 수업", "천연 에코 크래프트 결과물 증정", "토요일 골든타임(14:00~15:30) 운영"]
+        checkpoints: ["캠핑장 밀착형 수업", "천연 에코 크래프트 결과물 소장", "토요일 오후 2시 황금시간대"]
       },
       {
         id: "prod-teacher-exp",
         title: "숲선생님과 함께하는 숲탐험대",
-        subTitle: "유·초등 아이들이 전문 숲선생님과 함께 숲을 직접 탐색하는 참여형 숲체험",
+        subTitle: "유·초등 아이들이 전문 숲선생님과 숲을 직접 탐색하는 소수정예 숲체험",
         category: "숲해설",
         type: "지도사 방문",
         region: ["가평", "양평"],
@@ -676,27 +763,25 @@
         minCost: 0,
         duration: "90분",
         capacity: "4~6명 (소수 정예)",
-        days: "금 · 토 · 일",
+        days: "10~11월 주말",
         timeSlots: "16:00~17:30",
         target: "유아 · 초등 소그룹",
-        rainy: "제한적 (우천 시 사전 조율)",
+        rainy: "제한적",
         difficulty: "낮음",
         img: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=1000&q=80",
-        imgCaption: "전문 숲선생님과 루페를 들고 작은 숲 생태계를 밀착 탐험하는 아이들",
-        desc: "「숲선생님과 떠나는 숲탐험대」는 유·초등 아이들이 전문 숲선생님과 함께 숲을 직접 탐색하고 자연을 오감으로 경험하는 참여형 숲체험 프로그램입니다.",
-        effectText: "소수 정예 밀착 케어 → 생태 감수성 증진 → 팀워크 및 협동심 함양",
+        desc: "유·초등 아이들이 전문 숲선생님과 함께 숲을 밀착 탐색하고 자연을 오감으로 경험하는 소그룹 맞춤형 숲체험입니다.",
         curriculum: [
-          { step: 1, title: "1. 숲선생님과의 첫 만남 & 안전 수칙 (15분)", subtitle: "캠핑장 집결", desc: "안전한 탐험을 위한 규칙 숙지 및 몸 깨우기 체조" },
-          { step: 2, title: "2. 계절 숲 오감 생태 탐색 (35분)", subtitle: "숲길 탐험", desc: "나뭇잎 맥, 곤충, 나무껍질 오감 관찰 및 돋보기 탐구 미션" },
-          { step: 3, title: "3. 협동 숲놀이 & 자연물 창작 (30분)", subtitle: "숲속 놀이터", desc: "협동 미션 수행 및 주워 모은 자연물로 기념작품 만들기" },
-          { step: 4, title: "4. 탐험 완료 & 소감 나누기 (10분)", subtitle: "마무리", desc: "탐험 소감 발표, 탐험대 배지 수여 및 복귀" }
+          { step: 1, title: "1. 숲선생님과 첫 만남 (15분)", subtitle: "집결", desc: "안전 수칙 안내 및 몸 깨우기 체조" },
+          { step: 2, title: "2. 계절 숲 오감 탐색 (35분)", subtitle: "탐험", desc: "돋보기로 나뭇잎 맥, 곤충, 나무껍질 관찰" },
+          { step: 3, title: "3. 협동 숲놀이 (30분)", subtitle: "놀이터", desc: "자연물을 활용한 소그룹 협동 미션" },
+          { step: 4, title: "4. 탐험 완료 (10분)", subtitle: "마무리", desc: "소감 나누기 및 배지 수여" }
         ],
-        checkpoints: ["최소 운영비용 0원으로 부담 없는 도입", "4~6명 소수 정예 집중 케어", "금·토·일 오후 4시 운영"]
+        checkpoints: ["최소 운영비 0원", "4~6명 소수 집중 케어", "체크인 직후 최적"]
       },
       {
         id: "prod-nansea",
         title: "난새, 숲새, 놀새~!",
-        subTitle: "자연에서 자연물을 소재로 놀고 자연을 배우는 국가인증 프로그램",
+        subTitle: "자연에서 자연물을 소재로 놀고 배우는 국가인증 프로그램",
         category: "숲해설",
         type: "지도사 방문",
         region: ["가평"],
@@ -704,28 +789,26 @@
         minCost: 150000,
         duration: "60분",
         capacity: "8~15명",
-        days: "월 · 화 · 수 · 목 · 금 · 토 · 일 (상시)",
+        days: "10~11월 주말",
         timeSlots: "10:30~11:30",
-        target: "유아 · 초등 · 가족",
+        target: "유아 · 초등 가족",
         rainy: "제한적",
         difficulty: "낮음",
-        img: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=1000&q=80",
-        imgCaption: "자연물을 만지고 숲에서 뛰노는 국가 인증 숲놀이 프로그램",
         isCertified: true,
-        desc: "공인된 프로그램 인증을 획득하여 안전성과 교육적 완성도가 검증된 숲놀이 프로그램입니다.",
-        effectText: "자연 감수성 향상 → 창의적 자연물 놀이 → 오감 발달 및 생태계 이해",
+        img: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=1000&q=80",
+        desc: "공인된 프로그램 인증을 획득하여 신뢰도가 높으며, 자연물을 소재로 신나게 뛰노는 숲놀이입니다.",
         curriculum: [
-          { step: 1, title: "1. 숲과 반갑게 인사하기 (10분)", subtitle: "캠핑장 집결", desc: "몸풀기 체조 및 안전 수칙 안내" },
-          { step: 2, title: "2. 자연물 보물 수집 & 탐색 (20분)", subtitle: "숲길 산책", desc: "나뭇가지, 솔방울 등 다양한 자연물 재료 수집" },
-          { step: 3, title: "3. '난새, 숲새, 놀새' 신나는 숲놀이 (20분)", subtitle: "자연놀이 마당", desc: "전래 숲놀이 및 자연물 조형물 만들기" },
-          { step: 4, title: "4. 자연물 돌려주기 & 나눔 (10분)", subtitle: "마무리", desc: "자연물 반환 및 소감 나누기" }
+          { step: 1, title: "1. 숲 인사 (10분)", subtitle: "집결", desc: "안전 규칙 및 몸풀기" },
+          { step: 2, title: "2. 자연물 보물 수집 (20분)", subtitle: "탐색", desc: "솔방울, 도토리 등 자연물 찾기" },
+          { step: 3, title: "3. 전래 숲놀이 (20분)", subtitle: "놀이", desc: "자연물 활용 창의 놀이 진행" },
+          { step: 4, title: "4. 자연 환원 (10분)", subtitle: "마무리", desc: "자연물 제자리 돌려주기" }
         ],
-        checkpoints: ["국가 프로그램 인증 획득", "잔디마당 및 완만한 산책로 활용", "가평군 전역 파견"]
+        checkpoints: ["국가 프로그램 인증 완료", "가평 전역 출장", "마당/평지 활용"]
       },
       {
         id: "prod-night-exp",
         title: "[밤숲체험] 별빛 숲속 야간 탐험대",
-        subTitle: "인공 불빛을 끄고 밤에 깨어나는 야행성 곤충과 식물을 만나는 밤숲 탐험",
+        subTitle: "인공 불빛을 끄고 밤에 깨어나는 야행성 생태계를 만나는 밤숲 탐험",
         category: "숲해설",
         type: "지도사 방문",
         region: ["가평", "양평"],
@@ -733,22 +816,20 @@
         minCost: 13000,
         duration: "70분",
         capacity: "8~14명",
-        days: "금 · 토 · 일",
-        timeSlots: "하절기 19:30~20:40 / 동·간절기 19:00~20:10",
-        target: "어린이 동반 가족 · 캠퍼",
+        days: "10~11월 주말",
+        timeSlots: "19:00~20:10 (일몰 후)",
+        target: "어린이 동반 가족",
         rainy: "제한적",
         difficulty: "보통",
         img: "https://images.unsplash.com/photo-1517824806704-9040b037703b?auto=format&fit=crop&w=1000&q=80",
-        imgCaption: "레드라이트와 자외선 라이트를 들고 떠나는 밤숲 탐험",
-        desc: "전문 숲해설 지도사와 함께 인공 불빛을 끄고 밤에 깨어나는 곤충과 밤하늘의 소리에 집중해 보는 야간 탐방입니다.",
-        effectText: "야간 생태계 탐구 → 오감 자극 → 암순응 및 자연 호기심 자극",
+        desc: "전문 지도사와 함께 레드라이트를 들고 밤에 깨어나는 곤충과 밤하늘 별자리를 관찰합니다.",
         curriculum: [
-          { step: 1, title: "1. 집결 및 안전 오리엔테이션 (10분)", subtitle: "캠핑장 잔디마당", desc: "안전 수칙 안내 및 레드라이트 배부" },
-          { step: 2, title: "2. 오감 열기: 밤의 소리와 냄새 (15분)", subtitle: "밤숲 도입부", desc: "불빛 끄고 밤숲 소리와 피톤치드 느끼기" },
-          { step: 3, title: "3. 야행성 생태 탐색: 플래시 관찰 (30분)", subtitle: "숲길 탐험로", desc: "자외선(UV) 라이트로 야행성 곤충 및 애벌레 흔적 찾기" },
-          { step: 4, title: "4. 별빛 쉼터 & 마무리 (15분)", subtitle: "야외 쉼터", desc: "돗자리에 누워 별자리 관찰 및 수료증 전달" }
+          { step: 1, title: "1. 오리엔테이션 (10분)", subtitle: "집결", desc: "안전 수칙 및 레드라이트 배부" },
+          { step: 2, title: "2. 밤의 오감 열기 (15분)", subtitle: "도입", desc: "밤숲 소리와 피톤치드 맡기" },
+          { step: 3, title: "3. 플래시 생태 관찰 (30분)", subtitle: "탐험", desc: "UV 라이트로 야행성 곤충 관찰" },
+          { step: 4, title: "4. 별빛 쉼터 (15분)", subtitle: "마무리", desc: "별자리 관찰 및 수료증 전달" }
         ],
-        checkpoints: ["야간 안전 이동로 확보 필요", "레드라이트 등 전문 장비 전량 제공", "패밀리 캠핑 킬러 콘텐츠"]
+        checkpoints: ["야간 킬러 콘텐츠", "전문 탐사 장비 지원", "안전 이동로 확인"]
       },
       {
         id: "prod-shim-forest",
@@ -761,22 +842,20 @@
         minCost: 80000,
         duration: "50분",
         capacity: "8~14명",
-        days: "금 · 토 · 일",
+        days: "10~11월 주말",
         timeSlots: "15:30~16:20",
-        target: "온 가족 · 시니어 · 힐링 캠퍼",
+        target: "온 가족 · 힐링 캠퍼",
         rainy: "제한적",
         difficulty: "매우 낮음",
         img: "https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=1000&q=80",
-        imgCaption: "평탄한 숲길을 천천히 걸으며 자연을 루페로 관찰하는 느린 산책",
-        desc: "완만한 둘레길을 천천히 걸으며 들꽃을 관찰하고 그늘 아래서 아무것도 하지 않는 숲멍을 즐깁니다.",
-        effectText: "스트레스 경감 → 신체적 이완 → 자연 관찰력 회복",
+        desc: "가파른 등산 대신 완만한 둘레길을 걸으며 들꽃을 관찰하고 나무 그늘 아래서 숲멍을 즐깁니다.",
         curriculum: [
-          { step: 1, title: "1. 숲과의 첫인사 & 몸풀기 (5분)", subtitle: "잔디마당", desc: "가벼운 스트레칭 및 루페 배부" },
-          { step: 2, title: "2. 느린 걸음 생태 산책 (25분)", subtitle: "둘레길", desc: "루페로 들꽃, 이끼, 나뭇잎맥 관찰" },
-          { step: 3, title: "3. 숲 그늘 쉼터 & 오감 휴식 (15분)", subtitle: "그늘 돗자리", desc: "숲멍과 시원한 바람 즐기기" },
-          { step: 4, title: "4. 마무리 & 피드백 (5분)", subtitle: "마무리", desc: "소감 나누기 및 복귀" }
+          { step: 1, title: "1. 첫인사 (5분)", subtitle: "집결", desc: "몸풀기 및 루페 배부" },
+          { step: 2, title: "2. 느린 생태 산책 (25분)", subtitle: "산책", desc: "들꽃, 이끼, 나뭇잎맥 관찰" },
+          { step: 3, title: "3. 숲멍 휴식 (15분)", subtitle: "쉼터", desc: "그늘 돗자리에서 바람 소리 듣기" },
+          { step: 4, title: "4. 피드백 (5분)", subtitle: "마무리", desc: "소감 나누기" }
         ],
-        checkpoints: ["1인 10,000원 부담 없는 비용", "평지형 캠핑장 최적", "전 연령 수용 가능"]
+        checkpoints: ["1인 1만원 부담 없는 비용", "평지 캠핑장 최적", "전 연령 만족"]
       },
       {
         id: "prod-wedding",
@@ -789,21 +868,19 @@
         minCost: 300000,
         duration: "90분",
         capacity: "10명 이상",
-        days: "월 · 화 · 수 · 목 · 금 · 토 · 일 (상시)",
-        timeSlots: "10:00~16:00",
+        days: "10~11월 주말",
+        timeSlots: "10:00~16:00 (협의)",
         target: "부부 · 커플 · 리마인드 가족",
         rainy: "제한적",
         difficulty: "낮음",
         img: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1000&q=80",
-        imgCaption: "숲속 자연물을 활용한 부케와 화관으로 진행하는 리마인드 웨딩 숲해설",
-        desc: "자연물로 화관과 부케를 만들고 숲의 공생 이야기를 주례사로 듣는 감동 스토리텔링 프로그램입니다.",
-        effectText: "부부 유대감 회복 → 자연 공생의 지혜 습득 → 감성 추억 형성",
+        desc: "자연물로 화관과 부케를 만들고 숲의 공생 이야기를 주례사로 듣는 감성 스토리텔링 프로그램입니다.",
         curriculum: [
-          { step: 1, title: "1. 결혼반지 교환 (30분)", subtitle: "예물 준비", desc: "야생화로 화관, 부케, 꽃반지 제작" },
-          { step: 2, title: "2. 웨딩마치 및 주례사 (40분)", subtitle: "생태 스토리", desc: "지의류 등 숲의 공생 생태 해설" },
-          { step: 3, title: "3. 웨딩사진 촬영 및 마무리 (20분)", subtitle: "스냅 포토", desc: "자연 속 버진로드에서 기념촬영" }
+          { step: 1, title: "1. 예물 준비 (30분)", subtitle: "공예", desc: "야생화로 화관 및 부케 제작" },
+          { step: 2, title: "2. 웨딩마치 & 주례사 (40분)", subtitle: "숲길", desc: "지의류 등 숲의 공생 생태 해설" },
+          { step: 3, title: "3. 스냅 촬영 (20분)", subtitle: "포토존", desc: "자연 버진로드에서 기념촬영" }
         ],
-        checkpoints: ["부부/중장년 특화 프리미엄 콘텐츠", "사진 촬영 산책로 필요", "해설사 키트 총괄"]
+        checkpoints: ["부부·중장년 타깃", "사진 명소 캠핑장 추천", "해설사 키트 총괄"]
       },
       {
         id: "prod-ogm",
@@ -816,26 +893,24 @@
         minCost: 300000,
         duration: "90분",
         capacity: "8~20명",
-        days: "월 · 화 · 수 · 목 · 금 · 토 · 일 (상시)",
+        days: "10~11월 주말",
         timeSlots: "10:30~12:00 / 13:30~15:00",
-        target: "성인 · 가족 · 힐링 캠퍼",
+        target: "성인 · 가족 힐러",
         rainy: "제한적",
         difficulty: "낮음",
         img: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1000&q=80",
-        imgCaption: "숲길을 걸으며 깊은 호흡과 오감으로 자연과 교감하는 산림치유",
-        desc: "숲해설 중심 지식 전달보다 쉼, 느낌, 교감, 회복에 중점을 둔 고품격 산림치유 프로그램입니다.",
-        effectText: "긴장 완화 → 오감 자극 → 정서적 안정 → 자기성찰",
+        desc: "지식 전달보다 쉼, 호흡, 교감에 중점을 둔 고품격 산림치유 프로그램입니다.",
         curriculum: [
-          { step: 1, title: "Ⅰ. 도입 — 숲과 만나기 (20분)", subtitle: "숲 진입로", desc: "스트레칭 및 3·3·5 숲 호흡" },
-          { step: 2, title: "Ⅱ. 전개 — 오감으로 숲을 느끼기 (50분)", subtitle: "숲속 쉼터", desc: "오감 걷기, 숲 ASMR, 나에게 힘이 되는 나무 찾기" },
-          { step: 3, title: "Ⅲ. 마무리 — 숲의 편안함을 일상으로 (20분)", subtitle: "쉼터", desc: "따뜻한 차 테라피 및 회고" }
+          { step: 1, title: "Ⅰ. 숲과 만나기 (20분)", subtitle: "도입", desc: "스트레칭 및 3·3·5 숲 호흡" },
+          { step: 2, title: "Ⅱ. 오감 숲길 걷기 (50분)", subtitle: "치유", desc: "숲 ASMR 및 나에게 힘이 되는 나무 찾기" },
+          { step: 3, title: "Ⅲ. 일상으로 (20분)", subtitle: "마무리", desc: "따뜻한 숲차 테라피" }
         ],
-        checkpoints: ["산림치유 지도사 직접 방문", "완만한 산책로 활용", "최소비용 300,000원 기준"]
+        checkpoints: ["산림치유 지도사 방문", "완만한 산책로 활용", "차 테라피 포함"]
       },
       {
         id: "prod-1",
-        title: "나만의 작은 숲 (미니 정원 · 테라리움)",
-        subTitle: "작은 유리병 속에 나만의 숲을 담아가는 친환경 힐링 공예",
+        title: "나만의 작은 숲 (테라리움)",
+        subTitle: "유리병 속에 나만의 숲을 담아가는 친환경 힐링 공예",
         category: "자연공예",
         type: "셀프키트",
         region: ["가평", "양평"],
@@ -843,22 +918,20 @@
         minCost: 100000,
         duration: "60분",
         capacity: "10~20명",
-        days: "매일 운영 가능",
-        timeSlots: "10:00 / 14:00 / 15:00",
-        target: "가족 · 어린이 · 커플",
-        rainy: "좋음 (실내 완벽 대응)",
+        days: "상시 운영 가능",
+        timeSlots: "자율 운영",
+        target: "가족 · 커플",
+        rainy: "좋음 (실내 테이블)",
         difficulty: "낮음",
         img: "https://images.unsplash.com/photo-1545241047-6083a3684587?auto=format&fit=crop&w=1000&q=80",
-        imgCaption: "유리병 속에 이끼와 식물을 심어 완성한 미니 테라리움",
-        desc: "유리병 속에 자신만의 생태계를 만들어 집으로 가져가는 실내·외 테이블 공예 프로그램입니다.",
-        effectText: "소근육 발달 → 생태 순환 이해 → 성취감",
+        desc: "유리병 속에 자신만의 생태계를 만들어 집으로 가져가는 인기 공예 키트입니다.",
         curriculum: [
-          { step: 1, title: "작은 숲 이야기 (10분)", subtitle: "테이블", desc: "식물과 생태계 기본 원리 이해" },
-          { step: 2, title: "재료 탐색 (10분)", subtitle: "오감 관찰", desc: "마사토, 활성탄, 이끼 관찰" },
-          { step: 3, title: "미니 정원 식재 (30분)", subtitle: "집중 공예", desc: "배수층 구성 및 식물 식재" },
-          { step: 4, title: "이름표 달기 & 교육 (10분)", subtitle: "마무리", desc: "가정 내 돌봄 관리법 안내" }
+          { step: 1, title: "1. 숲 이야기 (10분)", subtitle: "이해", desc: "작은 생태계 원리 안내" },
+          { step: 2, title: "2. 재료 탐색 (10분)", subtitle: "관찰", desc: "이끼와 흙 촉감 느끼기" },
+          { step: 3, title: "3. 식재 및 꾸미기 (30분)", subtitle: "제작", desc: "배수층 깔기 및 식물 심기" },
+          { step: 4, title: "4. 돌봄 교육 (10분)", subtitle: "마무리", desc: "가정 내 관리법 안내" }
         ],
-        checkpoints: ["지도사 없이 키트로 자율 운영", "우천 시 실내 운영 최적", "기념품 소장 만족도 우수"]
+        checkpoints: ["지도사 없이 자율 운영", "우천 시 완벽 대응", "기념품 소장 만족도 우수"]
       },
       {
         id: "prod-2",
@@ -871,20 +944,18 @@
         minCost: 0,
         duration: "60분",
         capacity: "10명 이상",
-        days: "금 / 토 / 일",
+        days: "10~11월 주말",
         timeSlots: "사전 협의",
         target: "유아 · 초등 가족",
         rainy: "제한적",
         difficulty: "보통",
         img: "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1000&q=80",
-        imgCaption: "숲속 자연물을 관찰하고 탐험하는 어린이 숲체험",
-        desc: "미션 카드를 통해 자연 속 보물을 찾는 체험형 산림교육 프로그램입니다.",
-        effectText: "자연 관찰력 증진 → 야외 신체활동 → 가족 유대감",
+        desc: "미션 카드를 통해 숲속 다양한 자연물을 찾는 참여형 놀이 프로그램입니다.",
         curriculum: [
-          { step: 1, title: "숲과 친해지기 (10분)", subtitle: "마당", desc: "몸풀기 스트레칭 및 안전 확인" },
-          { step: 2, title: "미션 보물찾기 (25분)", subtitle: "숲길", desc: "미션 카드 속 자연 요소 찾기" },
-          { step: 3, title: "자연 탐정 미션 (15분)", subtitle: "정밀 관찰", desc: "루페로 곤충 및 식물 탐구" },
-          { step: 4, title: "마무리 (10분)", subtitle: "정리", desc: "소감 나눔 및 자연물 제자리 돌리기" }
+          { step: 1, title: "1. 친해지기 (10분)", subtitle: "몸풀기", desc: "스트레칭 및 안전 확인" },
+          { step: 2, title: "2. 보물찾기 (25분)", subtitle: "미션", desc: "자연 요소 탐색" },
+          { step: 3, title: "3. 자연 탐정 (15분)", subtitle: "관찰", desc: "루페로 곤충 정밀 탐구" },
+          { step: 4, title: "4. 마무리 (10분)", subtitle: "정리", desc: "소감 나눔" }
         ],
         checkpoints: ["숲길 접근성 필수", "지도사 방문 파견", "시설투자 불필요"]
       },
@@ -899,22 +970,20 @@
         minCost: 150000,
         duration: "60분",
         capacity: "10명 이상",
-        days: "금 / 토 / 일",
+        days: "10~11월 주말",
         timeSlots: "19:00 이후",
-        target: "성인 · 커플 · 감성 힐러",
+        target: "성인 · 감성 힐러",
         rainy: "제한적",
         difficulty: "보통",
         img: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1000&q=80",
-        imgCaption: "별빛 아래 고요한 숲길을 걷는 야간 힐링 트레킹",
-        desc: "밤의 숲길을 걸으며 호흡과 명상을 통해 심신을 회복하는 야간 산림치유 프로그램입니다.",
-        effectText: "스트레스 완화 → 오감 이완 → 수면의 질 향상",
+        desc: "밤의 숲길을 걸으며 호흡과 명상을 통해 심신을 이완하는 야간 치유 프로그램입니다.",
         curriculum: [
-          { step: 1, title: "별빛 숲 야간 산책 (15분)", subtitle: "산책로", desc: "인공 불빛 없이 오감 깨우기" },
-          { step: 2, title: "오감 체험 (10분)", subtitle: "청각 집중", desc: "풀벌레 소리와 밤숲 향기 느끼기" },
-          { step: 3, title: "별빛 호흡명상 (10분)", subtitle: "이완", desc: "싱잉볼 소리와 심신 안정" },
-          { step: 4, title: "차 테라피 & 소원카드 (25분)", subtitle: "마무리", desc: "허브차 시음 및 다짐 작성" }
+          { step: 1, title: "1. 별빛 산책 (15분)", subtitle: "오감", desc: "인공 불빛 끄고 걷기" },
+          { step: 2, title: "2. 밤숲 체험 (10분)", subtitle: "청각", desc: "풀벌레 소리 집중" },
+          { step: 3, title: "3. 호흡명상 (10분)", subtitle: "이완", desc: "싱잉볼 소리 감상" },
+          { step: 4, title: "4. 차 테라피 (25분)", subtitle: "마무리", desc: "허브차 시음 및 소원카드" }
         ],
-        checkpoints: ["야간 일정 충돌 없음", "노키즈/성인 캠퍼 만족도 높음", "조명 환경 확인 필요"]
+        checkpoints: ["야간 일정 충돌 없음", "성인 캠퍼 호응 우수", "조명 환경 확인"]
       }
     ];
 
@@ -922,6 +991,41 @@
     let compareList = [];
     let isAdminLoggedIn = false;
 
+    // 주말 칩 생성
+    function initWeekendSelectors() {
+      const g10 = document.getElementById('weekend-grid-10');
+      const g11 = document.getElementById('weekend-grid-11');
+      g10.innerHTML = '';
+      g11.innerHTML = '';
+
+      weekends10.forEach(w => {
+        const div = document.createElement('div');
+        div.className = 'weekend-chip';
+        div.textContent = w;
+        div.onclick = () => toggleWeekendChip(w, div);
+        g10.appendChild(div);
+      });
+
+      weekends11.forEach(w => {
+        const div = document.createElement('div');
+        div.className = 'weekend-chip';
+        div.textContent = w;
+        div.onclick = () => toggleWeekendChip(w, div);
+        g11.appendChild(div);
+      });
+    }
+
+    function toggleWeekendChip(val, elem) {
+      if (selectedWeekends.includes(val)) {
+        selectedWeekends = selectedWeekends.filter(x => x !== val);
+        elem.classList.remove('selected');
+      } else {
+        selectedWeekends.push(val);
+        elem.classList.add('selected');
+      }
+    }
+
+    // 상품 카드 렌더링
     function renderProducts() {
       const grid = document.getElementById('productGrid');
       grid.innerHTML = '';
@@ -941,7 +1045,7 @@
           <div style="position:relative;">
             <img src="${item.img}" class="card-img" alt="${item.title}" onerror="this.onerror=null; this.src='${fallbackImage}';">
             <div class="card-badges">
-              <span class="badge-tag" style="background:var(--badge-pilot);">파일럿</span>
+              <span class="badge-tag" style="background:var(--badge-pilot);">10~11월 주말</span>
               <span class="badge-tag">${item.region.join(' · ')}</span>
               ${item.isCertified ? `<span class="badge-tag" style="background:var(--badge-cert);">국가인증</span>` : ''}
             </div>
@@ -954,7 +1058,7 @@
               <div class="spec-item"><span>체험비용</span><strong>${item.price.toLocaleString()}원/인</strong></div>
               <div class="spec-item"><span>소요시간</span><strong>${item.duration}</strong></div>
               <div class="spec-item"><span>정원</span><strong>${item.capacity}</strong></div>
-              <div class="spec-item"><span>최소비용</span><strong>${item.minCost === 0 ? '없음 (0원)' : item.minCost.toLocaleString() + '원'}</strong></div>
+              <div class="spec-item"><span>최소비용</span><strong>${item.minCost === 0 ? '없음' : item.minCost.toLocaleString() + '원'}</strong></div>
             </div>
 
             <div style="margin-bottom:12px; display:flex; align-items:center; gap:8px;">
@@ -1005,7 +1109,7 @@
           <div style="display:flex; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
             <span class="badge-tag" style="background:var(--primary);">${p.category}</span>
             <span class="badge-tag" style="background:var(--primary-light);">${p.type}</span>
-            <span class="badge-tag" style="background:var(--badge-pilot);">${p.region.join(' · ')} 파일럿</span>
+            <span class="badge-tag" style="background:var(--badge-pilot);">10~11월 주말 파일럿</span>
             ${p.isCertified ? `<span class="badge-tag" style="background:var(--badge-cert);">인증 프로그램</span>` : ''}
           </div>
           <h1 style="margin: 8px 0 6px 0;">${p.title}</h1>
@@ -1013,7 +1117,7 @@
           
           <div class="metrics-grid">
             <div class="metric-card"><div class="metric-title">1인 체험비용</div><div class="metric-value">${p.price.toLocaleString()}원</div></div>
-            <div class="metric-card"><div class="metric-title">최소 운영비용</div><div class="metric-value">${p.minCost === 0 ? '없음 (0원)' : p.minCost.toLocaleString() + '원'}</div></div>
+            <div class="metric-card"><div class="metric-title">최소 운영비용</div><div class="metric-value">${p.minCost === 0 ? '없음' : p.minCost.toLocaleString() + '원'}</div></div>
             <div class="metric-card"><div class="metric-title">소요시간</div><div class="metric-value">${p.duration}</div></div>
             <div class="metric-card"><div class="metric-title">적정 정원</div><div class="metric-value">${p.capacity}</div></div>
             <div class="metric-card"><div class="metric-title">운영 요일</div><div class="metric-value">${p.days}</div></div>
@@ -1023,12 +1127,10 @@
         <div class="detail-section">
           <h3>프로그램 소개</h3>
           <p style="line-height:1.75; color:var(--text-sub); font-size:0.98rem;">${p.desc}</p>
-          ${p.effectText ? `<div class="effect-box">🌱 프로그램 핵심 가치 및 효과 : ${p.effectText}</div>` : ''}
         </div>
 
         <div class="detail-section">
           <h3>진행 커리큘럼</h3>
-          <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:16px;">* 현장 환경 및 캠핑장 상황에 맞춰 유동적으로 조율됩니다.</p>
           <div class="curriculum-list">
             ${curriculumHTML}
           </div>
@@ -1086,9 +1188,8 @@
       let rowDuration = '<tr><td>소요시간</td>' + selected.map(p => `<td>${p.duration}</td>`).join('') + '</tr>';
       let rowTarget = '<tr><td>권장대상</td>' + selected.map(p => `<td>${p.target}</td>`).join('') + '</tr>';
       let rowRain = '<tr><td>우천 대응</td>' + selected.map(p => `<td>${p.rainy}</td>`).join('') + '</tr>';
-      let rowDiff = '<tr><td>운영 난이도</td>' + selected.map(p => `<td>${p.difficulty}</td>`).join('') + '</tr>';
 
-      table.innerHTML = headerHTML + rowCategory + rowType + rowPrice + rowMinCost + rowDuration + rowTarget + rowRain + rowDiff;
+      table.innerHTML = headerHTML + rowCategory + rowType + rowPrice + rowMinCost + rowDuration + rowTarget + rowRain;
       modal.classList.add('show');
     }
 
@@ -1096,30 +1197,47 @@
       document.getElementById('compareModal').classList.remove('show');
     }
 
+    // 신규 신청 화면 열기
     function openApply(prodTitle) {
+      document.getElementById('edit-app-id').value = '';
+      document.getElementById('applyFormTitle').textContent = '캠핑장 연계서비스 신청';
+      document.getElementById('submitBtn').textContent = '연계서비스 신청 완료하기';
       document.getElementById('apply-program-name').value = prodTitle;
+      document.getElementById('applyForm').reset();
+      selectedWeekends = [];
+      document.querySelectorAll('.weekend-chip').forEach(c => c.classList.remove('selected'));
       navigateTo('apply');
     }
 
-    // [신청서 제출 로직] 구글 스프레드시트 중앙 DB로 실시간 전송
+    // 신청 제출 (신규 접수 및 수정 공통 처리)
     async function handleApplySubmit(e) {
       e.preventDefault();
+
+      if (selectedWeekends.length === 0) {
+        alert('희망 운영 주말 일자를 1개 이상 선택해 주세요.');
+        return;
+      }
+
+      const editId = document.getElementById('edit-app-id').value;
+      const isEdit = Boolean(editId);
+
       const submitBtn = document.getElementById('submitBtn');
       submitBtn.disabled = true;
-      submitBtn.textContent = '신청 데이터를 전송 중입니다...';
+      submitBtn.textContent = isEdit ? '수정 사항을 저장 중입니다...' : '신청 데이터를 전송 중입니다...';
 
       const selectedEnv = Array.from(document.querySelectorAll('input[name="env"]:checked')).map(el => el.value);
 
-      const newApp = {
-        id: "APP-" + Date.now().toString().slice(-6),
+      const appData = {
+        action: isEdit ? "update" : "create",
+        id: isEdit ? editId : "APP-" + Date.now().toString().slice(-6),
         date: new Date().toISOString().split('T')[0],
         campName: document.getElementById('camp-name').value,
         region: document.getElementById('camp-region').value,
         manager: document.getElementById('camp-manager').value,
-        phone: document.getElementById('camp-phone').value,
+        phone: document.getElementById('camp-phone').value.replace(/[^0-9]/g, ''),
         program: document.getElementById('apply-program-name').value,
-        planDate: document.getElementById('camp-date').value,
-        capacity: document.getElementById('camp-capacity').value,
+        planDates: selectedWeekends,
+        siteCount: document.getElementById('camp-site-count').value,
         env: selectedEnv,
         memo: document.getElementById('camp-memo').value,
         status: '신청접수'
@@ -1131,32 +1249,146 @@
             method: 'POST',
             mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newApp)
+            body: JSON.stringify(appData)
           });
         }
       } catch (err) {
-        console.warn("스프레드시트 전송 경고 (오프라인/CORS):", err);
+        console.warn("스프레드시트 통신 경고:", err);
       } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = '연계서비스 신청 완료하기';
 
+        document.getElementById('successTitle').textContent = isEdit ? '신청 내용 수정이 완료되었습니다' : '연계서비스 신청이 정상 접수되었습니다';
         document.getElementById('successReceipt').innerHTML = `
-          <div style="font-size:0.9rem; line-height: 1.8;">
-            <div><strong>접수 번호:</strong> ${newApp.id}</div>
-            <div><strong>신청 프로그램:</strong> <span style="color:var(--primary); font-weight:700;">${newApp.program}</span></div>
-            <div><strong>신청 캠핑장:</strong> ${newApp.campName} (${newApp.region})</div>
-            <div><strong>담당자 / 연락처:</strong> ${newApp.manager} (${newApp.phone})</div>
-            <div><strong>희망 운영일:</strong> ${newApp.planDate} / 예상 ${newApp.capacity}명</div>
-            <div><strong>진행 상태:</strong> <span style="background:#e3f2fd; color:#1976d2; padding:2px 8px; border-radius:4px; font-weight:700;">신청접수 완료</span></div>
+          <div style="font-size:0.92rem; line-height: 1.8;">
+            <div><strong>접수 번호:</strong> ${appData.id}</div>
+            <div><strong>신청 프로그램:</strong> <span style="color:var(--primary); font-weight:700;">${appData.program}</span></div>
+            <div><strong>캠핑장명:</strong> ${appData.campName} (${appData.region})</div>
+            <div><strong>담당자 / 연락처:</strong> ${appData.manager} (${appData.phone})</div>
+            <div><strong>희망 주말:</strong> ${appData.planDates.join(', ')}</div>
+            <div><strong>캠핑장 규모:</strong> 총 ${appData.siteCount}개 사이트</div>
+            <div><strong>진행 상태:</strong> <span style="background:#e3f2fd; color:#1976d2; padding:2px 8px; border-radius:4px; font-weight:700;">신청접수</span></div>
           </div>
         `;
 
-        document.getElementById('applyForm').reset();
         navigateTo('success');
       }
     }
 
-    // [운영 관리자 인증 & 클라우드 데이터 로딩]
+    // ==========================================
+    // 사장님: 본인 휴대폰 번호로 신청내역 확인 및 수정
+    // ==========================================
+
+    function openOwnerSearchModal() {
+      document.getElementById('ownerSearchPhone').value = '';
+      document.getElementById('ownerSearchModal').classList.add('show');
+    }
+
+    function closeOwnerSearchModal() {
+      document.getElementById('ownerSearchModal').classList.remove('show');
+    }
+
+    async function handleOwnerSearch(e) {
+      e.preventDefault();
+      const inputPhone = document.getElementById('ownerSearchPhone').value.replace(/[^0-9]/g, '');
+
+      if (!inputPhone || inputPhone.length < 4) {
+        alert('휴대폰 번호를 정확히 입력해주세요 (최소 뒷 4자리 이상).');
+        return;
+      }
+
+      closeOwnerSearchModal();
+      navigateTo('owner');
+      document.getElementById('ownerInfoText').textContent = `입력하신 번호(${inputPhone})로 접수된 신청 내역을 조회 중입니다...`;
+      document.getElementById('ownerAppList').innerHTML = `<p style="padding:20px; text-align:center;">클라우드에서 내역을 불러오는 중입니다...</p>`;
+
+      try {
+        const res = await fetch(GOOGLE_SCRIPT_URL);
+        const apps = await res.json();
+
+        // 입력한 번호가 포함된 내역 필터링
+        const myApps = apps.filter(a => a.phone && a.phone.toString().replace(/[^0-9]/g, '').includes(inputPhone));
+
+        if (!myApps || myApps.length === 0) {
+          document.getElementById('ownerInfoText').textContent = `조회 번호: ${inputPhone}`;
+          document.getElementById('ownerAppList').innerHTML = `
+            <div style="background:#fff; padding:32px; border-radius:12px; text-align:center; border:1px solid var(--border-color);">
+              <p style="color:var(--text-muted); margin-bottom:12px;">일치하는 신청 내역을 찾을 수 없습니다.</p>
+              <button class="btn btn-primary" style="max-width:180px;" onclick="openOwnerSearchModal()">다시 조회하기</button>
+            </div>
+          `;
+          return;
+        }
+
+        document.getElementById('ownerInfoText').textContent = `조회 완료: 총 ${myApps.length}건의 신청 내역이 확인되었습니다.`;
+        document.getElementById('ownerAppList').innerHTML = myApps.map(a => `
+          <div class="owner-app-card">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+              <div>
+                <span style="font-size:0.8rem; background:var(--bg-gray); padding:2px 8px; border-radius:4px; font-weight:600;">${a.id}</span>
+                <h3 style="margin-top:6px; color:var(--primary);">${a.program}</h3>
+              </div>
+              <span style="background:#e3f2fd; color:#1976d2; padding:4px 10px; border-radius:4px; font-weight:700; font-size:0.85rem;">
+                ${a.status || '신청접수'}
+              </span>
+            </div>
+
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px; font-size:0.9rem; background:var(--bg-gray); padding:14px; border-radius:8px; margin-bottom:14px;">
+              <div><strong>캠핑장:</strong> ${a.campName} (${a.region})</div>
+              <div><strong>담당자:</strong> ${a.manager} (${a.phone})</div>
+              <div><strong>사이트 수:</strong> 총 ${a.siteCount} 사이트</div>
+              <div><strong>희망 주말:</strong> ${(a.planDates && a.planDates.length > 0) ? a.planDates.join(', ') : '미지정'}</div>
+              <div style="grid-column: 1 / -1;"><strong>보유환경:</strong> ${(a.env && a.env.length > 0) ? a.env.join(', ') : '기본'}</div>
+              <div style="grid-column: 1 / -1;"><strong>요청 메모:</strong> ${a.memo || '없음'}</div>
+            </div>
+
+            <div style="text-align:right;">
+              <button class="btn btn-outline" style="max-width:140px; padding:8px 14px;" onclick='startEditApp(${JSON.stringify(a).replace(/'/g, "&apos;")})'>✏️ 내용 수정하기</button>
+            </div>
+          </div>
+        `).join('');
+
+      } catch (err) {
+        document.getElementById('ownerAppList').innerHTML = `<p style="padding:20px; text-align:center; color:#e53e3e;">데이터를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.</p>`;
+      }
+    }
+
+    // 신청 내용 수정 모드로 폼 세팅
+    function startEditApp(app) {
+      document.getElementById('edit-app-id').value = app.id;
+      document.getElementById('applyFormTitle').textContent = `신청 내용 수정 (${app.id})`;
+      document.getElementById('submitBtn').textContent = '수정 내용 저장하기';
+
+      document.getElementById('apply-program-name').value = app.program;
+      document.getElementById('camp-name').value = app.campName;
+      document.getElementById('camp-region').value = app.region;
+      document.getElementById('camp-manager').value = app.manager;
+      document.getElementById('camp-phone').value = app.phone;
+      document.getElementById('camp-site-count').value = app.siteCount || '';
+      document.getElementById('camp-memo').value = app.memo || '';
+
+      // 환경 체크박스
+      document.querySelectorAll('input[name="env"]').forEach(chk => {
+        chk.checked = app.env && app.env.includes(chk.value);
+      });
+
+      // 주말 칩 세팅
+      selectedWeekends = app.planDates ? [...app.planDates] : [];
+      document.querySelectorAll('.weekend-chip').forEach(chip => {
+        if (selectedWeekends.includes(chip.textContent)) {
+          chip.classList.add('selected');
+        } else {
+          chip.classList.remove('selected');
+        }
+      });
+
+      navigateTo('apply');
+      window.scrollTo(0, 0);
+    }
+
+    // ==========================================
+    // 운영 관리자 모달 및 기능
+    // ==========================================
+
     function openAdminModal() {
       if (isAdminLoggedIn) {
         navigateTo('admin');
@@ -1178,8 +1410,7 @@
         isAdminLoggedIn = true;
         closeAdminModal();
         alert('관리자 인증에 성공하였습니다.');
-        document.getElementById('nav-admin-btn').textContent = '⚙️ 관리자 모드 중';
-        document.getElementById('nav-admin-btn').style.borderColor = 'var(--primary)';
+        document.getElementById('nav-admin-btn').textContent = '⚙️ 관리자 대시보드';
         navigateTo('admin');
         fetchAdminApplications();
       } else {
@@ -1191,21 +1422,16 @@
       if (confirm('관리자 모드를 종료하시겠습니까?')) {
         isAdminLoggedIn = false;
         document.getElementById('nav-admin-btn').textContent = '🔒 운영 관리자';
-        document.getElementById('nav-admin-btn').style.borderColor = 'var(--border-color)';
         navigateTo('list');
       }
     }
 
-    // 관리자: 스프레드시트 중앙 DB에서 모든 캠핑장 신청 데이터 조회
     async function fetchAdminApplications() {
       const tbody = document.getElementById('adminTableBody');
       tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px;">클라우드에서 최신 데이터를 불러오는 중입니다...</td></tr>`;
 
       if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("여기에")) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:#e53e3e;">
-          <strong>구글 스프레드시트 URL이 아직 등록되지 않았습니다.</strong><br>
-          안내드린 가이드의 3단계 URL을 코드에 붙여넣어 주시면 전 캠핑장의 신청 내역이 실시간 연동됩니다.
-        </td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:#e53e3e;">구글 스프레드시트 URL을 등록해 주세요.</td></tr>`;
         return;
       }
 
@@ -1232,10 +1458,10 @@
               <div>${a.manager}</div>
               <div style="font-size:0.8rem; color:var(--text-muted);">${a.phone}</div>
             </td>
-            <td style="max-width:200px; font-weight:600; color:var(--primary);">${a.program}</td>
+            <td style="max-width:180px; font-weight:600; color:var(--primary);">${a.program}</td>
             <td>
-              <div>${a.planDate}</div>
-              <div style="font-size:0.8rem; color:var(--text-sub);">${a.capacity}명</div>
+              <div style="font-weight:600; color:var(--primary);">${(a.planDates && a.planDates.length > 0) ? a.planDates.join(', ') : '-'}</div>
+              <div style="font-size:0.8rem; color:var(--text-sub);">규모: ${a.siteCount || 0} 사이트</div>
             </td>
             <td style="font-size:0.8rem; color:var(--text-sub); max-width:180px;">
               <div><strong>환경:</strong> ${(a.env && a.env.length > 0) ? a.env.join(', ') : '기본'}</div>
@@ -1249,10 +1475,11 @@
           </tr>
         `).join('');
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:#e53e3e;">데이터를 가져오는데 실패했습니다. 구글 시트 권한(모든 사용자 허용)을 확인해주세요.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:#e53e3e;">데이터를 가져오는데 실패했습니다. 구글 시트 권한을 확인해주세요.</td></tr>`;
       }
     }
 
+    // 네비게이션 제어
     function navigateTo(viewId) {
       document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
       document.getElementById(`view-${viewId}`).classList.add('active');
@@ -1266,6 +1493,7 @@
     }
 
     window.onload = function() {
+      initWeekendSelectors();
       renderProducts();
     };
   </script>
